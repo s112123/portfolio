@@ -46,6 +46,11 @@
   color: #495057;
   padding: 8px 12px;
   text-decoration: none;
+  transition: color 0.2s ease; 
+}
+
+.btn-link:hover {
+  color: #1a73e8;
 }
 
 .btn-secondary {
