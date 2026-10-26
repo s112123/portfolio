@@ -53,6 +53,12 @@
   border-color: #1a73e8; 
 }
 
+.sign-in-box .sign-in-item input::placeholder {
+  font-size: 13px;
+  font-weight: 300;
+  color: rgb(130, 130, 130);
+}
+
 .error {
   width: 100%;
   padding: 5px 10px;
