@@ -1,0 +1,107 @@
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 64px);
+  width: 100%;
+  padding: 80px 0;
+  background-color: #f8f9fa;
+}
+
+.login-container {
+  width: 400px;
+}
+
+#welcome-message {
+  width: 100%;
+  padding: 5px 10px;
+  margin-bottom: 20px;
+  background-color: rgba(65, 196, 118, 0.2);
+  color: rgb(34, 116, 67);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sign-in-box {
+  width: 100%;
+  padding: 50px 50px;
+  background-color: #ffffff;
+  box-shadow: 0 0 5px rgb(150, 150, 150);
+  border-radius: 0;
+}
+
+.sign-in-box h2 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.sign-in-box .sign-in-item {
+  margin-bottom: 10px;
+}
+
+.sign-in-box .sign-in-item input {
+  width: 100%;
+  height: 35px;
+  padding: 8px;
+  border: 1px solid rgb(180, 180, 180);
+  border-radius: 2px;
+  outline: none;
+}
+
+.sign-in-box .sign-in-item input:focus {
+  border-color: #1a73e8; 
+}
+
+.error {
+  width: 100%;
+  padding: 5px 10px;
+  margin: 10px 0px;
+  background-color: rgba(210, 40, 40, 0.2);
+  color: rgb(210, 40, 40);
+  font-weight: 500;
+  font-size: 13px;
+  display: none;
+}
+
+.global-error {
+  margin-bottom: 10px;
+}
+
+.sign-in-box #btn-sign-in {
+  width: 100%;
+  height: 35px;
+  margin: 25px 0px 35px 0px;
+  padding: 5px 0px;
+  border: 1px solid #1a73e8;
+  background-color: #1a73e8; 
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+/* SIGN UP & FIND PASSWORD */
+.sign-in-box .sign-in-box-more-action {
+  font-size: 13px;
+  text-align: center;
+}
+
+.sign-in-box .sign-in-box-more-action a {
+  color: rgb(100, 100, 100);
+  text-decoration: none;
+}
+
+.sign-in-box .sign-in-box-more-action a:hover {
+  color: #1a73e8;
+}
+
+.sign-in-box .more-action-divider {
+  display: inline-block;
+  margin: 0 8px;
+  width: 1px;
+  height: 10px;
+  border-right: 1px solid rgb(100, 100, 100);
+  vertical-align: middle;
+}
