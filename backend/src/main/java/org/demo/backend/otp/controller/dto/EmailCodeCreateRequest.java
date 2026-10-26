@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmailCodeRequest {
+public class EmailCodeCreateRequest {
 
     @NotBlank(message = "이메일은 필수입니다")
     @Email

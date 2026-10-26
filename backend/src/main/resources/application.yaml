@@ -1,6 +1,8 @@
 spring:
   application:
     name: blog-service
+  profiles:
+    active: dev
 
 ---
 spring:

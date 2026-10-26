@@ -2,6 +2,7 @@ package org.demo.backend.otp.persistence;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.demo.backend.global.cache.CaffeineCacheConfig;
 import org.demo.backend.otp.domain.OtpRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -15,25 +16,35 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class RedisOtpRepository implements OtpRepository {
 
-    private final String OTP_KEY_FORMAT = "otp:code:%s";
-
     private final RedisTemplate<String, String> redisTemplate;
 
     @Override
-    public void set(String identifier, String data) {
-        String key = String.format(OTP_KEY_FORMAT, identifier);
-        redisTemplate.opsForValue().set(key, data, Duration.ofMinutes(3));
+    public void saveOtp(String identifier, String data, Duration ttl) {
+        String key = OtpCacheKey.generateOtpKey(identifier);
+        redisTemplate.opsForValue().set(key, data, ttl);
     }
 
     @Override
-    public String get(String identifier) {
-        String key = String.format(OTP_KEY_FORMAT, identifier);
+    public String getOtp(String identifier) {
+        String key = OtpCacheKey.generateOtpKey(identifier);
         return redisTemplate.opsForValue().get(key);
     }
 
     @Override
-    public void invalidate(String identifier) {
-        String key = String.format(OTP_KEY_FORMAT, identifier);
+    public void invalidateOpt(String identifier) {
+        String key = OtpCacheKey.generateOtpKey(identifier);
         redisTemplate.delete(key);
+    }
+
+    @Override
+    public void saveVerificationResult(String identifier, Duration ttl) {
+        String key = OtpCacheKey.generateOtpKey(identifier);
+        redisTemplate.opsForValue().set(key, "true", ttl);
+    }
+
+    @Override
+    public boolean isVerified(String identifier) {
+        String key = OtpCacheKey.generateOtpKey(identifier);
+        return redisTemplate.hasKey(key);
     }
 }

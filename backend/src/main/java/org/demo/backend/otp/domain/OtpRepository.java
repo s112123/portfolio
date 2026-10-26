@@ -1,13 +1,22 @@
 package org.demo.backend.otp.domain;
 
+import java.time.Duration;
+import java.util.Optional;
+
 public interface OtpRepository {
 
-    // 캐시 저장
-    void set(String identifier, String data);
+    // OTP 코드 저장
+    void saveOtp(String identifier, String data, Duration ttl);
 
-    // 캐시 조회
-    String get(String identifier);
+    // OTP 코드 조회
+    String getOtp(String identifier);
 
-    // 캐시 무효화
-    void invalidate(String identifier);
+    // OTP 코드 캐시 무효화
+    void invalidateOpt(String identifier);
+
+    // OTP 코드 검증
+    void saveVerificationResult(String identifier, Duration ttl);
+
+    // OTP 코드 검증 상태
+    boolean isVerified(String identifier);
 }

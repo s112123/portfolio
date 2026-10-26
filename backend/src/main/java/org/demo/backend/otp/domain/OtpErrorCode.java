@@ -15,6 +15,12 @@ public enum OtpErrorCode implements ErrorCode {
             "인증 코드가 유효하지 않습니다"
     ),
 
+    NOT_VERIFIED_CODE(
+            HttpStatus.BAD_REQUEST,
+            "NOT_VERIFIED_CODE",
+            "인증이 완료되지 않았습니다"
+    ),
+
     EMAIL_SEND_FAILED(
             HttpStatus.INTERNAL_SERVER_ERROR,
             "EMAIL_SEND_FAILED",
