@@ -20,8 +20,4 @@ public class MemberCreateRequest {
     @NotBlank(message = "비밀번호는 필수입니다")
     @Size(min=4, max=8, message = "비밀번호는 4~8자리입니다")
     private String password;
-
-    @NotBlank(message = "인증 코드는 필수입니다")
-    @Size(min=6, max=6, message = "인증 코드는 6자리입니다")
-    private String code;
 }

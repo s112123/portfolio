@@ -34,9 +34,6 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private LocalDateTime registeredAt;
 
-    @Column
-    private LocalDateTime deletedAt;
-
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private ProfileImage profileImage;
 
@@ -54,7 +51,6 @@ public class Member extends BaseTimeEntity {
         member.nickname = nickname;
         member.role = MemberRole.USER;
         member.registeredAt = registeredAt;
-        member.deletedAt = null;
         assignDefaultProfileImage(member, defaultProfileImage, defaultProfileImageUrl);
         return member;
     }
