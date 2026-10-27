@@ -38,13 +38,13 @@ public class RedisOtpRepository implements OtpRepository {
 
     @Override
     public void saveVerificationResult(String identifier, Duration ttl) {
-        String key = OtpCacheKey.generateOtpKey(identifier);
+        String key = OtpCacheKey.generateVerifiedKey(identifier);
         redisTemplate.opsForValue().set(key, "true", ttl);
     }
 
     @Override
     public boolean isVerified(String identifier) {
-        String key = OtpCacheKey.generateOtpKey(identifier);
+        String key = OtpCacheKey.generateVerifiedKey(identifier);
         return redisTemplate.hasKey(key);
     }
 }

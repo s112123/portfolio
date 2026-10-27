@@ -107,7 +107,7 @@ const Signup = () => {
     setUiState((prev) => ({ ...prev, currentEmail: trimmedEmail }));
 
     try {
-      const response = await api.post('http://localhost:8080/api/v1/otp/send/email', { email: trimmedEmail });
+      const response = await api.post('/v1/otp/send/email', { email: trimmedEmail });
       setUiState((prev) => ({
         ...prev,
         showConfirmBox: true,
@@ -163,7 +163,7 @@ const Signup = () => {
     }
 
     try {
-      const response = await api.post('http://localhost:8080/api/v1/otp/verify/email', {
+      const response = await api.post('/v1/otp/verify/email', {
         email: uiState.currentEmail,
         code: form.confirmCode.trim(),
       });
@@ -179,7 +179,8 @@ const Signup = () => {
           sendMessage: '',
         }));
         setForm((prev) => ({ ...prev, confirmCode: '' }));
-        setErrors((prev) => ({ ...prev, confirmCode: '' }));
+        // 인증 성공 시 기존 이메일 에러 메시지 초기화
+        setErrors((prev) => ({ ...prev, email: '', confirmCode: '' }));
         // 인증 성공 시 타이머 정지
         setIsTimerRunning(false); 
       } else {
