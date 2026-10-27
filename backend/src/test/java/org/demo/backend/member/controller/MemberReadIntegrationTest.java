@@ -1,27 +1,16 @@
 package org.demo.backend.member.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.backend.common.IntegrationTest;
-import org.demo.backend.member.application.dto.MemberDetail;
-import org.demo.backend.member.controller.dto.MemberCreateRequest;
-import org.demo.backend.member.domain.MemberRole;
-import org.demo.backend.member.fixture.MemberFixture;
 import org.demo.backend.otp.application.OtpService;
-import org.demo.backend.otp.controller.dto.EmailCodeCreateRequest;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
 @IntegrationTest

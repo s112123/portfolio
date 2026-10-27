@@ -5,14 +5,11 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class CaffeineCacheConfig {
@@ -21,13 +18,13 @@ public class CaffeineCacheConfig {
     // 그래서 동적 TTL 을 구성하려면 다음과 같이 한다
     @Qualifier("otpCache")
     @Bean
-    public Cache<String, OtpCacheValue> otpCache() {
+    public Cache<String, CacheValue<?>> otpCache() {
         return Caffeine.newBuilder()
-                .expireAfter(new Expiry<String, OtpCacheValue>() {
+                .expireAfter(new Expiry<String, CacheValue<?>>() {
                     @Override
                     public long expireAfterCreate(
                             String key,
-                            OtpCacheValue value,
+                            CacheValue<?> value,
                             long currentTime
                     ) {
                         // 래퍼 객체에 담긴 TTL 을 읽어와서 나노초로 변환 (Caffeine 요구 규격)
@@ -37,7 +34,7 @@ public class CaffeineCacheConfig {
                     @Override
                     public long expireAfterUpdate(
                             String key,
-                            OtpCacheValue value,
+                            CacheValue<?> value,
                             long currentTime,
                             long currentDuration
                     ) {
@@ -47,7 +44,7 @@ public class CaffeineCacheConfig {
                     @Override
                     public long expireAfterRead(
                             String key,
-                            OtpCacheValue value,
+                            CacheValue<?> value,
                             long currentTime,
                             long currentDuration
                     ) {
@@ -61,9 +58,9 @@ public class CaffeineCacheConfig {
     // 값과 TTL 을 함께 담는 래퍼 클래스
     @Getter
     @AllArgsConstructor
-    public static class OtpCacheValue {
+    public static class CacheValue<T> {
 
-        private final String data;
+        private final T data;
         private final Duration ttl;
     }
 }

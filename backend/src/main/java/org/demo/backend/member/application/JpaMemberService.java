@@ -10,7 +10,6 @@ import org.demo.backend.member.domain.MemberRepository;
 import org.demo.backend.member.domain.ProfileImageProperties;
 import org.demo.backend.otp.application.OtpService;
 import org.demo.backend.otp.domain.OtpErrorCode;
-import org.demo.backend.otp.domain.OtpRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +30,7 @@ public class JpaMemberService implements MemberService {
     @Transactional
     public MemberDetail create(MemberCreateRequest request) {
         // 1. 인증 코드 검증 상태 확인
-        if (otpService.isVerified(request.getEmail())) {
+        if (!otpService.isVerified(request.getEmail())) {
             throw new BusinessException(OtpErrorCode.NOT_VERIFIED_CODE);
         }
         // 2. 존재하는 이메일인지 여부

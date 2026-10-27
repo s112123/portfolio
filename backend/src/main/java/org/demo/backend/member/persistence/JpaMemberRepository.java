@@ -32,4 +32,9 @@ public class JpaMemberRepository implements MemberRepository {
     public void deleteById(Long memberId) {
         memberJpaRepository.deleteById(memberId);
     }
+
+    @Override
+    public Optional<Member> findByEmail(String email) {
+        return memberJpaRepository.findByEmail(email);
+    }
 }

@@ -1,9 +1,11 @@
 package org.demo.backend.global.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.demo.backend.global.exception.dto.ErrorDetail;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,6 +39,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(status)
                 .body(new ErrorDetail<>(status, e.getMessage()));
+    }
+
+    // 인증 예외
+    // 원래 시큐리티의 예외는 @RestControllerAdvice 에서 잡을 수 없다
+    // 하지만 REST API 로 로그인하는 경우, 시큐리티 필터를 통과하여 DispatcherServlet 으로 넘어오기 때문에 잡을 수 있다
+    // 단, 보안의 목적으로 스프링 내부에서 BadCredentialsException 예외로 감싸서 터뜨린다
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorDetail<?>> handleBadCredentialsException(BadCredentialsException e) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        return ResponseEntity
+                .status(status)
+                .body(new ErrorDetail<>(status, "이메일 또는 비밀번호가 올바르지 않습니다"));
     }
 
     // 비즈니스 로직 예외

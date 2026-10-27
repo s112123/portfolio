@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/axios';
@@ -51,26 +50,75 @@ const Login = () => {
   // 로그인 처리
   const handleLogin = async (e) => {
     e.preventDefault();
+    
+    // 요청 전 에러 초기화
+    setEmailError('');
+    setPasswordError('');
     setGlobalError('');
 
     if (!validateEmail(email)) return;
     if (!validatePassword(password)) return;
 
     try {
-      const response = await api.post('/login', {
+      const response = await api.post('/v1/auth/login', {
         email: email.trim(),
         password: password.trim(),
       });
+      
+      console.log(response.data);
 
-      const token = response.data.accessToken || response.data.token;
-      localStorage.setItem('accessToken', token);
-
-      navigate('/');
-      window.location.reload(); 
+      if (response.data.success) {
+        const token = response.data.data;
+        localStorage.setItem('itBlogAccessToken', token);
+        
+        navigate('/');
+        // window.location.href = '/';
+      }
     } catch (error) {
-      console.error('로그인 실패:', error);
-      const message = error.response?.data?.message || '이메일 또는 비밀번호가 올바르지 않습니다';
-      setGlobalError(message);
+      console.error('로그인 실패 응답:', error.response);
+      const errorData = error.response?.data;
+      const messages = errorData?.message;
+
+      let handled = false;
+
+      // 서버에서 message가 배열로 오는 경우 처리 (예: ["password:비밀번호는 4~8자리입니다"])
+      if (Array.isArray(messages)) {
+        messages.forEach((msgItem) => {
+          if (typeof msgItem === 'string' && msgItem.includes(':')) {
+            const colonIndex = msgItem.indexOf(':');
+            const field = msgItem.substring(0, colonIndex).trim().toLowerCase();
+            const msg = msgItem.substring(colonIndex + 1).trim();
+
+            if (field.includes('email')) {
+              setEmailError(msg);
+              handled = true;
+            } else if (field.includes('password') || field.includes('pwd')) {
+              setPasswordError(msg);
+              handled = true;
+            }
+          }
+        });
+      } 
+      // 문자열 형태이거나 단일 메시지인 경우 기존 로직 처리
+      else if (typeof messages === 'string' && messages.includes(':')) {
+        const colonIndex = messages.indexOf(':');
+        const field = messages.substring(0, colonIndex).trim().toLowerCase();
+        const msg = messages.substring(colonIndex + 1).trim();
+
+        if (field.includes('email')) {
+          setEmailError(msg);
+          handled = true;
+        } else if (field.includes('password') || field.includes('pwd')) {
+          setPasswordError(msg);
+          handled = true;
+        }
+      }
+
+      // 어디에도 매칭되지 않거나 필드 에러가 아닌 일반 전역 에러인 경우
+      if (!handled) {
+        const fallbackMsg = Array.isArray(messages) ? messages.join(', ') : (messages || '이메일 또는 비밀번호가 올바르지 않습니다');
+        setGlobalError(fallbackMsg);
+      }
     }
   };
 
@@ -114,7 +162,6 @@ const Login = () => {
 
         <div className="sign-in-box">
           <h2>로그인</h2>
-          
           <form onSubmit={handleLogin} className="login-form">
             <div className="sign-in-item">
               <input
@@ -130,7 +177,6 @@ const Login = () => {
               />
               {emailError && <small className="error" style={{ display: 'block' }}>{emailError}</small>}
             </div>
-
             <div className="sign-in-item">
               <input
                 type="password"
@@ -148,11 +194,8 @@ const Login = () => {
 
             {globalError && <small className="error global-error" style={{ display: 'block' }}>{globalError}</small>}
 
-            <button type="submit" id="btn-sign-in" className="login-btn">
-              로그인
-            </button>
+            <button type="submit" id="btn-sign-in" className="login-btn">로그인</button>
           </form>
-
           <p className="sign-in-box-more-action">
             <a href="/signup">회원가입</a>
             <span className="more-action-divider"></span>
