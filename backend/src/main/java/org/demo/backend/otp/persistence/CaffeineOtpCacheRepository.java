@@ -2,24 +2,24 @@ package org.demo.backend.otp.persistence;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
-import org.demo.backend.otp.domain.OtpRepository;
+import org.demo.backend.otp.domain.OtpCacheRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 
-import static org.demo.backend.global.cache.CaffeineCacheConfig.*;
+import static org.demo.backend.global.cache.CaffeineCacheConfig.CacheValue;
 
 
 @Slf4j
 @Profile({"default", "test"})
 @Repository
-public class CaffeineOtpRepository implements OtpRepository {
+public class CaffeineOtpCacheRepository implements OtpCacheRepository {
 
     private final Cache<String, CacheValue<?>> otpCache;
 
-    public CaffeineOtpRepository(@Qualifier("otpCache") Cache<String, CacheValue<?>> otpCache) {
+    public CaffeineOtpCacheRepository(@Qualifier("otpCache") Cache<String, CacheValue<?>> otpCache) {
         this.otpCache = otpCache;
     }
 

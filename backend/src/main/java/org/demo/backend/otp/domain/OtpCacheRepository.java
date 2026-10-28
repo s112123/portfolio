@@ -1,9 +1,8 @@
 package org.demo.backend.otp.domain;
 
 import java.time.Duration;
-import java.util.Optional;
 
-public interface OtpRepository {
+public interface OtpCacheRepository {
 
     // OTP 코드 저장
     void saveOtp(String identifier, String data, Duration ttl);

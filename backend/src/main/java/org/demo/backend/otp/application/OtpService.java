@@ -2,9 +2,8 @@ package org.demo.backend.otp.application;
 
 import lombok.RequiredArgsConstructor;
 import org.demo.backend.global.exception.BusinessException;
+import org.demo.backend.otp.domain.OtpCacheRepository;
 import org.demo.backend.otp.domain.OtpErrorCode;
-import org.demo.backend.otp.domain.OtpRepository;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -15,7 +14,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OtpService {
 
-    private final OtpRepository otpRepository;
+    private final OtpCacheRepository otpCacheRepository;
 
     // 인증 코드 생성
     public String generate(String identifier) {
@@ -24,7 +23,7 @@ public class OtpService {
         // 2. 인증 코드 6자리 생성
         String verifyCode = UUID.randomUUID().toString().substring(0, 6);
         // 3. 인증 코드를 캐시에 저장 (TTL: 3분)
-        otpRepository.saveOtp(identifier, verifyCode, Duration.ofMinutes(3));
+        otpCacheRepository.saveOtp(identifier, verifyCode, Duration.ofMinutes(3));
         return verifyCode;
     }
 
@@ -34,15 +33,15 @@ public class OtpService {
         Assert.hasText(identifier, "identifier is not null or not blank");
         Assert.hasText(code, "code is not null or not blank");
         // 2. 캐시에 저장된 인증 코드 조회 (없거나 만료되면 null 반환)
-        String savedCode = otpRepository.getOtp(identifier);
+        String savedCode = otpCacheRepository.getOtp(identifier);
         // 3. 저장된 코드가 없거나 입력받은 코드와 일치하지 않는 경우
         if (savedCode == null || !savedCode.equals(code)) {
             throw new BusinessException(OtpErrorCode.INVALID_CODE);
         }
         // 4. 인증 여부를 캐시에 저장
-        otpRepository.saveVerificationResult(identifier, Duration.ofMinutes(1));
+        otpCacheRepository.saveVerificationResult(identifier, Duration.ofMinutes(1));
         // 5. 인증 성공 시, 재사용 방지를 위해 즉시 캐시에서 제거
-        otpRepository.invalidateOpt(identifier);
+        otpCacheRepository.invalidateOpt(identifier);
     }
 
     // 인증 코드 확인 상태
@@ -50,6 +49,6 @@ public class OtpService {
         // 1. 유효성 검사
         Assert.hasText(identifier, "identifier is not null or not blank");
         // 2. 코드 검증 상태
-        return otpRepository.isVerified(identifier);
+        return otpCacheRepository.isVerified(identifier);
     }
 }

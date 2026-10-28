@@ -65,14 +65,12 @@ const Login = () => {
         password: password.trim(),
       });
       
-      console.log(response.data);
-
       if (response.data.success) {
         const token = response.data.data;
         localStorage.setItem('itBlogAccessToken', token);
         
         navigate('/');
-        // window.location.href = '/';
+        window.location.href = '/';
       }
     } catch (error) {
       console.error('로그인 실패 응답:', error.response);

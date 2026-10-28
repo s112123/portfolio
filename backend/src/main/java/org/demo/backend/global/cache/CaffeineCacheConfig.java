@@ -20,39 +20,38 @@ public class CaffeineCacheConfig {
     @Bean
     public Cache<String, CacheValue<?>> otpCache() {
         return Caffeine.newBuilder()
-                .expireAfter(new Expiry<String, CacheValue<?>>() {
-                    @Override
-                    public long expireAfterCreate(
-                            String key,
-                            CacheValue<?> value,
-                            long currentTime
-                    ) {
-                        // 래퍼 객체에 담긴 TTL 을 읽어와서 나노초로 변환 (Caffeine 요구 규격)
-                        return value.getTtl().toNanos();
-                    }
-
-                    @Override
-                    public long expireAfterUpdate(
-                            String key,
-                            CacheValue<?> value,
-                            long currentTime,
-                            long currentDuration
-                    ) {
-                        return value.getTtl().toNanos();
-                    }
-
-                    @Override
-                    public long expireAfterRead(
-                            String key,
-                            CacheValue<?> value,
-                            long currentTime,
-                            long currentDuration
-                    ) {
-                        // 조회 시에는 기존 만료 시간 유지
-                        return currentDuration;
-                    }
-                })
+                .expireAfter(createExpiryPolicy())
                 .build();
+    }
+
+    @Qualifier("jwtCache")
+    @Bean
+    public Cache<String, CacheValue<?>> jwtCache() {
+        return Caffeine.newBuilder()
+                .expireAfter(createExpiryPolicy())
+                .build();
+    }
+
+    // Expiry 정책 생성
+    private Expiry<String, CacheValue<?>> createExpiryPolicy() {
+        return new Expiry<String, CacheValue<?>>() {
+            @Override
+            public long expireAfterCreate(String key, CacheValue<?> value, long currentTime) {
+                // 래퍼 객체에 담긴 TTL 을 읽어와서 나노초로 변환 (Caffeine 요구 규격)
+                return value.getTtl().toNanos();
+            }
+
+            @Override
+            public long expireAfterUpdate(String key, CacheValue<?> value, long currentTime, long currentDuration) {
+                return value.getTtl().toNanos();
+            }
+
+            @Override
+            public long expireAfterRead(String key, CacheValue<?> value, long currentTime, long currentDuration) {
+                // 조회 시에는 기존 만료 시간 유지
+                return currentDuration;
+            }
+        };
     }
 
     // 값과 TTL 을 함께 담는 래퍼 클래스

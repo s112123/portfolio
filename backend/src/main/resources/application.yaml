@@ -2,14 +2,14 @@ spring:
   application:
     name: blog-service
   profiles:
-    active: test
+    active: dev
 
 jwt:
   secret-key: MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=
   access-token:
-    expiration: 600000      # 10분 → 1000 * 60 * 10 (ms)
+    expiration: 600000      # 10분 (600000) → 1000 * 60 * 10 (ms)
   refresh-token:
-    expiration: 86400000   # 1일 → 1000 * 60 * 60 * 24 * 1 (ms)
+    expiration: 86400000   # 1일 (86400000) → 1000 * 60 * 60 * 24 * 1 (ms)
 
 ---
 spring:

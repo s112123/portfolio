@@ -1,5 +1,6 @@
-package org.demo.backend.global.jwt;
+package org.demo.backend.global.jwt.provider;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -65,5 +66,34 @@ public class JwtProvider {
                 .expiration(expirationTime)
                 .signWith(getSignatureKey())
                 .compact();
+    }
+
+    // JWT 검증하기
+    public Claims validate(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignatureKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    // 만료시간 추출하기
+    public Date getExpiration(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignatureKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration();
+    }
+
+    // Subject 추출
+    public String getSubject(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignatureKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
     }
 }
