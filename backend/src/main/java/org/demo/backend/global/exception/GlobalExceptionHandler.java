@@ -1,8 +1,13 @@
 package org.demo.backend.global.exception;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.demo.backend.global.exception.dto.ErrorDetail;
+import org.demo.backend.global.jwt.domain.JwtErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -11,6 +16,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,6 +59,26 @@ public class GlobalExceptionHandler {
                 .body(new ErrorDetail<>(status, "이메일 또는 비밀번호가 올바르지 않습니다"));
     }
 
+    // JWT 예외
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ErrorDetail<?>> handleJwtException(JwtException e) {
+        ErrorCode errorCode = JwtErrorCode.INVALID;
+        if (e instanceof ExpiredJwtException) {
+            errorCode = JwtErrorCode.EXPIRED;
+        } else if (e instanceof MalformedJwtException) {
+            errorCode = JwtErrorCode.MALFORMED;
+        } else if (e instanceof SignatureException) {
+            errorCode = JwtErrorCode.INVALID_SIGNATURE;
+        } else if (e instanceof UnsupportedJwtException) {
+            errorCode = JwtErrorCode.UNSUPPORTED;
+        }
+
+        HttpStatus status = errorCode.getStatus();
+        return ResponseEntity
+                .status(status)
+                .body(new ErrorDetail<>(status, errorCode.getCode(), errorCode.getMessage()));
+    }
+
     // 비즈니스 로직 예외
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorDetail<?>> handleBusinessException(BusinessException e) {
@@ -64,8 +90,13 @@ public class GlobalExceptionHandler {
 
     // 예측할 수 없는 예외
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorDetail<?>> handleException(Exception e) {
-        log.error("Unexpected error occurred", e);
+    public ResponseEntity<ErrorDetail<?>> handleException(Exception e, HttpServletRequest request) {
+        log.error("[Unexpected Error] URI: {}, Method: {}, Message: {}",
+                request.getRequestURI(),
+                request.getMethod(),
+                e.getMessage(),
+                e
+        );
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         return ResponseEntity
                 .status(status)

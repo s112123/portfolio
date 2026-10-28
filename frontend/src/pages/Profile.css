@@ -1,0 +1,124 @@
+.profile-wrapper {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.profile-container h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+.profile-card {
+  background-color: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+
+.profile-image-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-info-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.info-group p {
+  font-size: 16px;
+  color: #333;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* 버튼들을 오른쪽으로 나란히 배치 */
+.profile-actions {
+  display: flex;
+  justify-content: flex-end; 
+  align-items: center;
+  gap: 10px; /* 버튼 사이 간격 */
+  margin-top: 24px;
+}
+
+/* 홈으로 버튼 스타일 */
+.btn-home {
+  background-color: #1a73e8;
+  color: #ffffff; /* 선명한 흰색으로 변경 */
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.btn-home:hover {
+  background-color: #1557b0; 
+}
+
+/* 회원 탈퇴 버튼 스타일 */
+.btn-withdraw {
+  background-color: rgba(210, 40, 40, 0.06); 
+  color: rgb(210, 40, 40);                   
+  border: 1px solid rgba(210, 40, 40, 0.3); 
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-withdraw:hover {
+  background-color: rgb(210, 40, 40);        
+  color: #ffffff;                            
+  border: 1px solid rgb(210, 40, 40);
+}
+
+.profile-loading {
+  text-align: center;
+  padding: 100px 0;
+  font-size: 16px;
+  color: #888;
+}
+
+/* 모바일 반응형 스타일 (화면 너비 768px 이하) */
+@media screen and (max-width: 768px) {
+  .profile-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px 20px;
+    gap: 24px;
+  }
+  
+  .profile-actions {
+    justify-content: center;
+  }
+}
