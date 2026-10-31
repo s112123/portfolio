@@ -19,10 +19,11 @@ import java.time.LocalDateTime;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class JpaMemberService implements MemberService {
+public class MemberJpaService implements MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ProfileImageProperties profileImageProperties;
     private final OtpService otpService;
 
     // 회원 등록
@@ -45,8 +46,7 @@ public class JpaMemberService implements MemberService {
                         request.getEmail(),
                         encodedPassword,
                         NicknameUtils.generate(),
-                        ProfileImageProperties.DEFAULT_PROFILE_IMAGE,
-                        ProfileImageProperties.DEFAULT_PROFILE_IMAGE_URL,
+                        profileImageProperties.getDefaultImageUrl(),
                         LocalDateTime.now()
                 )
         );

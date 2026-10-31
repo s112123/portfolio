@@ -27,6 +27,9 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private String nickname;
 
+    @Column(nullable = false)
+    private String profileImageUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MemberRole role;
@@ -41,28 +44,16 @@ public class Member extends BaseTimeEntity {
             String email,
             String encodedPassword,
             String nickname,
-            String defaultProfileImage,
-            String defaultProfileImageUrl,
+            String profileImageUrl,
             LocalDateTime registeredAt
     ) {
         Member member = new Member();
         member.email = email;
         member.password = encodedPassword;
         member.nickname = nickname;
+        member.profileImageUrl = profileImageUrl;
         member.role = MemberRole.USER;
         member.registeredAt = registeredAt;
-        assignDefaultProfileImage(member, defaultProfileImage, defaultProfileImageUrl);
         return member;
-    }
-
-    // 기본 프로필 이미지 등록
-    private static void assignDefaultProfileImage(
-            Member member,
-            String defaultProfileImage,
-            String defaultProfileImageUrl
-    ) {
-        ProfileImage profileImage = ProfileImage.of(defaultProfileImage, defaultProfileImage, defaultProfileImageUrl);
-        member.profileImage = profileImage;
-        profileImage.assignMember(member);
     }
 }

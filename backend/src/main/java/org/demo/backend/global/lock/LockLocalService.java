@@ -2,7 +2,6 @@ package org.demo.backend.global.lock;
 
 import lombok.RequiredArgsConstructor;
 import org.demo.backend.global.exception.BusinessException;
-import org.demo.backend.global.jwt.domain.JwtErrorCode;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +14,7 @@ import java.util.function.Supplier;
 @Profile({"default", "test"})
 @Component
 @RequiredArgsConstructor
-public class LocalLockService implements LockService {
+public class LockLocalService implements LockService {
 
     private final ConcurrentMap<String, ReentrantLock> lockMap = new ConcurrentHashMap<>();
 

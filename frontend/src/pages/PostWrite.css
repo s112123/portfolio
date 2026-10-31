@@ -1,0 +1,136 @@
+.post-write-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #333;
+}
+
+.post-write-header {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #111;
+}
+
+.post-write-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ----- TITLE ----- */
+.post-title-wrapper {
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.post-write-form .post-title-wrapper .post-title-input {
+  width: 100%;
+  padding: 14px 24px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #24292e;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+.post-title-input::placeholder {
+  font-size: 14px;
+  font-weight: 300;
+  color: rgb(130, 130, 130);
+}
+
+/* ----- Toast UI Editor ----- */
+.post-write-form .post-title-wrapper .post-title-input,
+.toast-editor-box .ProseMirror {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif; /* 현재 프로젝트에서 사용하는 폰트로 지정 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.toast-editor-box .ProseMirror {
+  position: relative;
+  font-size: 14px;
+  font-weight: 400;
+  color: #24292e;
+  line-height: 1.7;
+}
+
+.toast-editor-box .ProseMirror:has(
+  > p:only-child > br.ProseMirror-trailingBreak
+)::before {
+  content: "내용을 작성하세요";
+  position: absolute;
+  top: 16px;
+  left: 25px;
+  color: rgb(130, 130, 130);
+  font-size: 14px;
+  font-weight: 300;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ----- ERROR MESSAGE BOX ----- */
+.error-message {
+  width: 100%;
+  padding: 8px 24px;
+  font-size: 13px;
+  background-color: rgba(210, 40, 40, 0.1);
+  color: rgb(210, 40, 40);
+  font-weight: 500;
+  border-radius: 4px;
+  border: 1px solid rgba(210, 40, 40, 0.2);
+}
+
+/* ----- BOTTOM BUTTON ----- */
+.post-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ----- SUBMIT BUTTON ----- */
+.btn-submit {
+  background-color: #d9383a;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-submit:hover {
+  background-color: #c53032;
+}
+
+.btn-submit:disabled {
+  background-color: #e57373;
+  cursor: not-allowed;
+}
+
+/* ----- CANCEL BUTTON ----- */
+.btn-cancel {
+  background-color: #e5e7eb;
+  color: #374151;
+  border: none;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  background-color: #d1d5db;
+}
+
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

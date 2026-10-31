@@ -21,7 +21,7 @@ const api = axios.create({
 // 요청 인터셉터
 api.interceptors.request.use(
   (config) => {
-    console.log(`url=${config.url}`);
+    // console.log(`url=${config.url}`);
     const isPublic = PUBLIC_URLS.some((url) => config.url?.includes(url));
     if (!isPublic) {
       const token = localStorage.getItem('itBlogAccessToken');
@@ -61,9 +61,16 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // 1. 401 에러이고, 아직 재시도하지 않은 요청인 경우에만 처리
+    // 404 에러
+    if (error.response && error.response.status === 404) {
+      const errorMessage = error.response.data?.message || '요청하신 리소스를 찾을 수 없습니다.';
+      alert(errorMessage);
+      window.history.back();
+      return Promise.reject(error);
+    }
+
+    // 401 에러이고, 아직 재시도하지 않은 요청인 경우에만 처리
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
-      
       // 리프레시를 시도하면 안 되는 퍼블릭 API 경로 (로그인, 회원가입 등)
       const skipRefreshUrls = ['/auth/login', '/auth/signup', '/auth/refresh', '/auth/logout'];
       const isSkipUrl = skipRefreshUrls.some((url) => originalRequest.url?.includes(url));

@@ -116,6 +116,14 @@ public class JwtCheckFilter extends OncePerRequestFilter {
         if (requestURI.equals("/api/v1/members")) {
             return requestMethod.equalsIgnoreCase("POST");
         }
+        // "/api/v1/profile-images" 로 시작하는 경로는 POST 만 공개 허용하고 나머지는 JWT 를 검증한다
+        if (requestURI.startsWith("/api/v1/profile-images")) {
+            return requestMethod.equalsIgnoreCase("GET");
+        }
+        // "/api/v1/post-images" 로 시작하는 경로는 POST 만 공개 허용하고 나머지는 JWT 를 검증한다
+        if (requestURI.startsWith("/api/v1/post-images")) {
+            return requestMethod.equalsIgnoreCase("GET");
+        }
         return whiteList.stream().anyMatch(url -> antPathMatcher.match(url, requestURI));
     }
 }

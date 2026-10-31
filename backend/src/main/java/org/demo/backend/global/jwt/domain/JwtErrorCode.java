@@ -12,13 +12,13 @@ public enum JwtErrorCode implements ErrorCode {
     NOT_FOUND(
             HttpStatus.UNAUTHORIZED,
             "NOT_FOUND_TOKEN",
-            "토큰이 존재하지 않습니다"
+            "로그인이 필요한 서비스입니다"
     ),
 
     INVALID(
             HttpStatus.UNAUTHORIZED,
             "INVALID_TOKEN",
-            "토큰이 유효하지 않습니다"
+            "인증이 유효하지 않습니다"
     ),
 
     EXPIRED(

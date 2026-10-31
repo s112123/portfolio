@@ -15,6 +15,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -45,6 +46,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(status)
                 .body(new ErrorDetail<>(status, e.getMessage()));
+    }
+
+    // 파일 업로드 용량 초과 예외
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorDetail<?>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return ResponseEntity
+                .status(status)
+                .body(new ErrorDetail<>(status, "첨부 파일 크기는 1MB 이하이어야 합니다"));
     }
 
     // 인증 예외

@@ -5,23 +5,18 @@ import './Signup.css';
 
 const Signup = () => {
   const navigate = useNavigate();
-
-  // 1. 입력값 상태 (Form Data)
   const [form, setForm] = useState({
     email: '',
     password: '',
     rePassword: '',
     confirmCode: '',
   });
-
-  // 2. 에러 및 UI 상태
   const [errors, setErrors] = useState({
     email: '',
     password: '',
     rePassword: '',
     confirmCode: '',
   });
-
   const [uiState, setUiState] = useState({
     currentEmail: '',
     showConfirmBox: false,
@@ -30,7 +25,7 @@ const Signup = () => {
     confirmCodeMessage: '',
   });
 
-  // 3. 타이머 상태 (초 단위, 3분 = 180초)
+  // 타이머 상태 (초 단위, 3분 = 180초)
   const [timeLeft, setTimeLeft] = useState(180);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
@@ -68,14 +63,14 @@ const Signup = () => {
     return msg;
   };
 
-  // 입력값 변경 핸들러 (공통)
+  // 입력값 변경 핸들러
   const handleChange = (e) => {
     const { id, value } = e.target;
     setForm((prev) => ({ ...prev, [id]: value }));
     setErrors((prev) => ({ ...prev, [id]: '' }));
   };
 
-  // 개별 유효성 검사 함수들
+  // 개별 유효성 검사 함수
   const validate = {
     email: (value) => {
       if (!value.trim()) return '이메일을 입력하세요';
@@ -95,7 +90,7 @@ const Signup = () => {
     },
   };
 
-  // [이벤트] 인증코드 전송 버튼 클릭
+  // 인증코드 전송 버튼 클릭
   const handleSendMail = async () => {
     const emailErr = validate.email(form.email);
     if (emailErr) {

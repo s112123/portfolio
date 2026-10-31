@@ -12,7 +12,6 @@ import org.demo.backend.global.jwt.provider.JwtProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -102,5 +101,4 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, expiredCookie.toString())
                 .body(ApiResponse.success("로그아웃되었습니다."));
     }
-
 }

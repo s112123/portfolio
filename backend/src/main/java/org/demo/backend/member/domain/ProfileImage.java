@@ -25,6 +25,9 @@ public class ProfileImage {
     @Column(nullable = false)
     private String url;
 
+    @Column(nullable = false)
+    private String filePath;
+
     @OneToOne
     @JoinColumn(name = "member_id")
     private Member member;
@@ -32,11 +35,13 @@ public class ProfileImage {
     public static ProfileImage of(
             String originalFileName,
             String savedFileName,
+            String filePath,
             String url
     ) {
         ProfileImage profileImage = new ProfileImage();
         profileImage.originalFileName = originalFileName;
         profileImage.savedFileName = savedFileName;
+        profileImage.filePath = filePath;
         profileImage.url = url;
         return profileImage;
     }

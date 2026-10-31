@@ -4,6 +4,7 @@ import api from '../api/axios';
 import './Profile.css';
 
 const Profile = () => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState({
     email: '',
@@ -24,9 +25,8 @@ const Profile = () => {
         setUserInfo({
           email: memberData.email,
           nickname: memberData.nickname,
-          // 프로필 이미지 URL이 상대 경로로 올 경우 백엔드 주소 결합
-          profile: memberData.profileImage?.url 
-            ? `http://localhost:8080${memberData.profileImage.url}` 
+          profile: memberData.profileImageUrl 
+            ? `${baseUrl}${memberData.profileImageUrl}` 
             : ''
         });
       } catch (error) {

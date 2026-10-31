@@ -1,61 +1,60 @@
 package org.demo.backend.global.jwt.persistence;
 
-import com.github.benmanes.caffeine.cache.Cache;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.backend.global.jwt.application.dto.JwtDetail;
 import org.demo.backend.global.jwt.domain.JwtCacheRepository;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.demo.backend.global.serde.DataSerializer;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 
-import static org.demo.backend.global.cache.CaffeineCacheConfig.CacheValue;
-
 @Slf4j
-@Profile({"default", "test"})
+@Profile({"dev", "prod"})
 @Repository
-public class CaffeineJwtCacheRepository implements JwtCacheRepository<JwtDetail> {
+@RequiredArgsConstructor
+public class JwtRedisCacheRepository implements JwtCacheRepository<JwtDetail> {
 
-    private final Cache<String, CacheValue<?>> jwtCache;
-
-    public CaffeineJwtCacheRepository(@Qualifier("jwtCache") Cache<String, CacheValue<?>> jwtCache) {
-        this.jwtCache = jwtCache;
-    }
+    private final RedisTemplate<String, String> redisTemplate;
+    private final DataSerializer dataSerializer;
 
     @Override
     public void saveToken(String identifier, JwtDetail value, Duration ttl) {
         String key = JwtCacheKey.generateJwtKey(identifier);
-        jwtCache.put(key, new CacheValue<>(value, ttl));
+        redisTemplate.opsForValue().set(key, dataSerializer.serializeOrException(value), ttl);
     }
 
     @Override
     public JwtDetail getToken(String identifier) {
         String key = JwtCacheKey.generateJwtKey(identifier);
-        return (JwtDetail) jwtCache.getIfPresent(key).getData();
+        String jwtDetail = redisTemplate.opsForValue().get(key);
+        return dataSerializer.deserializeOrNull(jwtDetail, JwtDetail.class);
     }
 
     @Override
     public void invalidateToken(String identifier) {
         String key = JwtCacheKey.generateJwtKey(identifier);
-        jwtCache.invalidate(key);
+        redisTemplate.delete(key);
     }
 
     @Override
     public void saveBlacklistToken(String identifier, JwtDetail value, Duration ttl) {
         String key = JwtCacheKey.generateBlacklistKey(identifier);
-        jwtCache.put(key, new CacheValue<>(value, ttl));
+        redisTemplate.opsForValue().set(key, dataSerializer.serializeOrException(value), ttl);
     }
 
     @Override
     public JwtDetail getBlacklistToken(String identifier) {
         String key = JwtCacheKey.generateBlacklistKey(identifier);
-        return (JwtDetail) jwtCache.getIfPresent(key).getData();
+        String jwtDetail = redisTemplate.opsForValue().get(key);
+        return dataSerializer.deserializeOrNull(jwtDetail, JwtDetail.class);
     }
 
     @Override
     public boolean isBlacklisted(String identifier) {
         String key = JwtCacheKey.generateBlacklistKey(identifier);
-        return jwtCache.getIfPresent(key) != null;
+        return redisTemplate.hasKey(key);
     }
 }

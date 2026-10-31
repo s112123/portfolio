@@ -1,49 +1,56 @@
 package org.demo.backend.otp.persistence;
 
-import lombok.RequiredArgsConstructor;
+import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.backend.otp.domain.OtpCacheRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 
-@Slf4j
-@Profile({"dev", "prod"})
-@Repository
-@RequiredArgsConstructor
-public class RedisOtpCacheRepository implements OtpCacheRepository {
+import static org.demo.backend.global.cache.CaffeineCacheConfig.CacheValue;
 
-    private final RedisTemplate<String, String> redisTemplate;
+
+@Slf4j
+@Profile({"default", "test"})
+@Repository
+public class OtpCaffeineCacheRepository implements OtpCacheRepository {
+
+    private final Cache<String, CacheValue<?>> otpCache;
+
+    public OtpCaffeineCacheRepository(@Qualifier("otpCache") Cache<String, CacheValue<?>> otpCache) {
+        this.otpCache = otpCache;
+    }
 
     @Override
     public void saveOtp(String identifier, String data, Duration ttl) {
         String key = OtpCacheKey.generateOtpKey(identifier);
-        redisTemplate.opsForValue().set(key, data, ttl);
+        otpCache.put(key, new CacheValue<>(data, ttl));
     }
 
     @Override
     public String getOtp(String identifier) {
         String key = OtpCacheKey.generateOtpKey(identifier);
-        return redisTemplate.opsForValue().get(key);
+        return (String) otpCache.getIfPresent(key).getData();
     }
 
     @Override
     public void invalidateOpt(String identifier) {
         String key = OtpCacheKey.generateOtpKey(identifier);
-        redisTemplate.delete(key);
+        otpCache.invalidate(key);
     }
 
     @Override
     public void saveVerificationResult(String identifier, Duration ttl) {
         String key = OtpCacheKey.generateVerifiedKey(identifier);
-        redisTemplate.opsForValue().set(key, "true", ttl);
+        otpCache.put(key, new CacheValue<>("true", ttl));
     }
 
     @Override
     public boolean isVerified(String identifier) {
         String key = OtpCacheKey.generateVerifiedKey(identifier);
-        return redisTemplate.hasKey(key);
+        // 또는 return otpCache.asMap().containsKey(key);
+        return otpCache.getIfPresent(key) != null;
     }
 }
