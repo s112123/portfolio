@@ -1,6 +1,5 @@
 package org.demo.backend.global.jwt.application;
 
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.demo.backend.global.exception.BusinessException;
 import org.demo.backend.global.jwt.application.dto.JwtDetail;
@@ -11,7 +10,6 @@ import org.demo.backend.global.jwt.provider.JwtProvider;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;

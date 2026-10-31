@@ -1,9 +1,14 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ServerCheckLayout from './components/ServerCheckLayout';
+import PrivateRoute from './components/PrivateRoute';
+import Main from './pages/Main';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Profile from './pages/Profile';
+import PostWrite from './pages/PostWrite';
+import PostRead from './pages/PostRead';
+import PostEdit from './pages/PostEdit';
 import ErrorPage from './pages/ErrorPage';
 import './index.css';
 
@@ -13,21 +18,20 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/error" element={<ErrorPage />} />
+          
           <Route element={<ServerCheckLayout />}>
-            <Route 
-              path="/" 
-              element={
-                <main className="container" style={{ padding: '40px 20px' }}>
-                  <h2>반갑습니다</h2>
-                  <p style={{ marginTop: '12px', color: '#666'}}>
-                    REST API 와 연동할 준비가 완료된 메인화면입니다
-                  </p>
-                </main>
-              } 
-            />
+            {/* 1. 퍼블릭 페이지 */}
+            <Route path="/" element={<Main />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/post/write" element={<PostWrite />} />
+            <Route path="/post/view" element={<PostRead />} />
+            <Route path="/post/edit" element={<PostEdit />} />
+
+            {/* 2. 보호된 페이지 */}
+            <Route element={<PrivateRoute />}>
+              <Route path="/profile" element={<Profile />} />
+            </Route>
           </Route>
         </Routes>
       </div>

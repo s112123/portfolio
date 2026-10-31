@@ -25,7 +25,6 @@ const Header = () => {
     } finally {
       localStorage.removeItem('itBlogAccessToken');
       setIsLoggedIn(false);
-      // 3. 홈으로 이동
       navigate('/');
     }
   };

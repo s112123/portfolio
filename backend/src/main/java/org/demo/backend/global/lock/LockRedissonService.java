@@ -2,7 +2,6 @@ package org.demo.backend.global.lock;
 
 import lombok.RequiredArgsConstructor;
 import org.demo.backend.global.exception.BusinessException;
-import org.demo.backend.global.jwt.domain.JwtErrorCode;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.context.annotation.Profile;
@@ -14,7 +13,7 @@ import java.util.function.Supplier;
 @Profile({"dev", "prod"})
 @Component
 @RequiredArgsConstructor
-public class RedissonLockService implements LockService {
+public class LockRedissonService implements LockService {
 
     private final RedissonClient redissonClient;
 

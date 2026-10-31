@@ -3,15 +3,32 @@ spring:
     name: blog-service
   profiles:
     active: dev
+  multipart:
+    max-file-size: 1MB
+    max-request-size: 10MB
+    file-size-threshold: 2KB
 
 jwt:
   secret-key: MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=
   access-token:
-    expiration: 600000      # 10분 (600000) → 1000 * 60 * 10 (ms)
+    expiration: 600000     # 10분 (600000) → 1000 * 60 * 10 (ms)
   refresh-token:
     expiration: 86400000   # 1일 (86400000) → 1000 * 60 * 60 * 24 * 1 (ms)
+#
+#logging:
+#  level:
+#    org.hibernate.SQL: debug
+#    # 이 부분이 ?로 찍히던 실제 파라미터 값을 trace로 보여줍니다.
+#    org.hibernate.type.descriptor.sql.BasicBinder: trace
+
+logging:
+  level:
+    org.springframework.security: DEBUG
 
 ---
+app:
+  host: http://localhost:8080
+
 spring:
   config:
     activate:
@@ -32,15 +49,37 @@ spring:
       path: /h2-console
       settings:
         web-allow-others: true
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.redisson.spring.starter.RedissonAutoConfiguration
+
+file-upload:
+  member:
+    base-url: /api/v1/member-profiles/
+    default-image:
+      file: default.png
+      path: classpath:/static/images/member/default.png
+    storage: D:/upload/member/
+  post:
+    base-url: /api/v1/post-images/
+    default-image:
+      file: default.png
+      path: classpath:/static/images/post/default.png
+    storage: D:/upload/post/
 
 ---
+app:
+  host: http://localhost:8080
+
 spring:
   config:
     activate:
       on-profile: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/portfolio
+    url: jdbc:mysql://localhost:3306/post
     username: root
     password: '0000'
   jpa:
@@ -54,7 +93,24 @@ spring:
       host: localhost
       port: 6379
 
+file-upload:
+  member:
+    base-url: /api/v1/profile-images/
+    default-image:
+      path: classpath:/static/images/member/
+      file: default.png
+    storage: D:/upload/member/
+  post:
+    base-url: /api/v1/post-images/
+    default-image:
+      path: classpath:/static/images/post/
+      file: default.png
+    storage: D:/upload/post/
+
 ---
+app:
+  host: http://localhost:8080
+
 spring:
   config:
     activate:

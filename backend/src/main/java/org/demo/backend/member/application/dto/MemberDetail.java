@@ -12,6 +12,7 @@ public class MemberDetail {
     private Long id;
     private String email;
     private String nickname;
+    private String profileImageUrl;
     private MemberRole role;
     private ProfileImageDetail profileImage;
     private LocalDateTime registeredAt;
@@ -21,8 +22,11 @@ public class MemberDetail {
         detail.id = member.getId();
         detail.email = member.getEmail();
         detail.nickname = member.getNickname();
+        detail.profileImageUrl = member.getProfileImageUrl();
         detail.role = member.getRole();
-        detail.profileImage = ProfileImageDetail.of(member.getProfileImage());
+        if (member.getProfileImage() != null) {
+            detail.profileImage = ProfileImageDetail.of(member.getProfileImage());
+        }
         detail.registeredAt = member.getRegisteredAt();
         return detail;
     }
