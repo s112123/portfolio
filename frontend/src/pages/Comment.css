@@ -1,0 +1,188 @@
+/* 댓글 영역 전체 컨테이너 */
+.comments-section {
+  margin-top: 30px;
+}
+
+/* 댓글 입력 폼 */
+.comment-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.comment-input {
+  flex: 1;
+  padding: 10px;
+  font-size: 0.9rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.btn-comment-submit {
+  padding: 0 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* 댓글 목록 */
+.comment-list {
+  margin-top: 20px;
+}
+
+/* 댓글 아이템 기본 구조 (부모 댓글) */
+.comment-item {
+  padding: 16px 0 !important; /* 상하 여백을 16px로 늘려 원래 상자 높이 복원 */
+  border-bottom: 1px solid #f0f0f0;
+  position: relative;
+  padding-left: 16px !important;
+  border-left: 2px solid #cbd5e1 !important; /* 왼쪽 연결선 */
+}
+
+/* 자식 댓글(대댓글)인 경우의 들여쓰기 및 선 스타일 */
+.comment-reply-item {
+  margin-left: 35px !important;
+  padding: 16px 0 !important; /* 자식 댓글도 상하 여백 복원 */
+  padding-left: 16px !important;
+  border-bottom: 1px solid #f0f0f0;
+  position: relative;
+  border-left: 2px solid #cbd5e1 !important; /* 자식 댓글 왼쪽 연결선 */
+}
+
+/* 댓글 메타 정보 (프로필 + 닉네임 + 날짜) */
+.comment-meta-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px; /* 헤더 아래 간격 살짝 확대 */
+}
+
+.comment-profile-img {
+  width: 28px;  /* 프로필 이미지 크기도 원래 크기로 조정 */
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.comment-writer {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.comment-date {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+/* 댓글 본문 */
+.comment-text {
+  margin: 6px 0 10px 0; /* 본문 위아래 간격 넉넉하게 조정 */
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* 하단 액션 버튼 (답글 / 삭제) */
+.comment-actions {
+  display: flex;
+  gap: 10px;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.btn-action-reply,
+.btn-action-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-action-reply {
+  color: #007bff;
+}
+
+.btn-action-delete {
+  color: #dc3545;
+}
+
+/* 답글 작성 토글 폼 */
+.reply-form {
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+}
+
+.reply-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+}
+
+.reply-target-name {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.btn-reply-close {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.reply-input-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.reply-input {
+  flex: 1;
+  padding: 8px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  background-color: #fff;
+}
+
+.btn-reply-submit {
+  padding: 0 12px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* 댓글 페이지네이션 */
+.comment-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 24px;
+}
+
+.btn-page {
+  padding: 4px 10px;
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.btn-page.active {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}

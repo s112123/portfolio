@@ -43,11 +43,13 @@ public class SecurityConfig {
                         .antMatchers(HttpMethod.POST, "/api/v1/otp/send/**").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/otp/verify/**").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/members").permitAll()
+                        .antMatchers(HttpMethod.PATCH, "/api/v1/members/change-password").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/v1/profile-images/**").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/v1/post-images/**").permitAll()
+                        .antMatchers(HttpMethod.GET, "/api/v1/posts/*").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
                 .build();
@@ -67,7 +69,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

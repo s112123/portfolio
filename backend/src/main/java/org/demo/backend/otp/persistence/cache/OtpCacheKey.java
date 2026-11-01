@@ -1,4 +1,4 @@
-package org.demo.backend.otp.persistence;
+package org.demo.backend.otp.persistence.cache;
 
 public abstract class OtpCacheKey {
 

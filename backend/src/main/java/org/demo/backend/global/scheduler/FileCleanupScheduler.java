@@ -1,11 +1,11 @@
 package org.demo.backend.global.scheduler;
 
 import lombok.RequiredArgsConstructor;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.demo.backend.global.file.FileUtils;
 import org.demo.backend.post.domain.PostImage;
 import org.demo.backend.post.domain.PostImageStatus;
 import org.demo.backend.post.persistence.PostImageRepositoryAdapter;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,13 @@ public class FileCleanupScheduler {
     private final PostImageRepositoryAdapter postImageRepositoryAdapter;
 
     // 임시 파일 삭제 (매일 새벽 3시마다)
+    // ShedLock 대신 분산 락으로 다른 서버가 스케쥴러를 돌리지 못하도록 구현해도 된다
     @Scheduled(cron = "0 0 3 * * *")
+    @SchedulerLock(
+            name = "cleanUpOrphanPostImages",
+            lockAtLeastFor = "10m",
+            lockAtMostFor = "30m"
+    )
     @Transactional
     public void cleanUpOrphanPostImages() {
         // 1. 파일 상태가 TEMP 이면서 24시간이 지난 파일 조회

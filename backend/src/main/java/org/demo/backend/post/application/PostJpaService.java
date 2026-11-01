@@ -10,10 +10,10 @@ import org.demo.backend.post.controller.dto.PostCreateRequest;
 import org.demo.backend.post.controller.dto.PostUpdateRequest;
 import org.demo.backend.post.domain.Post;
 import org.demo.backend.post.domain.PostErrorCode;
+import org.demo.backend.post.domain.PostHitsCacheRepository;
 import org.demo.backend.post.domain.PostImageProperties;
 import org.demo.backend.post.persistence.PostImageRepositoryAdapter;
 import org.demo.backend.post.persistence.PostRepositoryAdapter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +32,7 @@ public class PostJpaService implements PostService {
     private final PostImageProperties postImageProperties;
     private final PostRepositoryAdapter postRepositoryAdapter;
     private final PostImageRepositoryAdapter postImageRepositoryAdapter;
+    private final PostHitsCacheRepository postHitsCacheRepository;
 
     @Override
     @Transactional
@@ -57,17 +58,17 @@ public class PostJpaService implements PostService {
             // 썸네일 경로 업데이트
             savedPost.updateThumbUrl(postImageProperties.getFirstImageUrl(filenamesInContent));
         }
-
-        // TODO: 팔로우 기능이 있다면 팔로워에게 비동기 알림 전송 → 트랜잭션 롤백 주의
         return savedPost.getId();
     }
 
     @Override
-    public PostDetail readById(Long postId) {
-        // TODO: 조회수
-        return postRepositoryAdapter.fetchById(postId)
-                .map(PostDetail::of)
+    public PostDetail readByIdWithHitsCache(Long postId, String viewer, boolean liked) {
+        // 1. 게시물 조회
+        Post post = postRepositoryAdapter.fetchById(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.NOT_FOUND));
+        // 2. 조회 수 증분
+        Long incrementedHits = postHitsCacheRepository.addViewerAndIncrementDelta(postId, viewer);
+        return PostDetail.of(post, post.getHits() + incrementedHits, liked);
     }
 
     @Override

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.demo.backend.global.exception.BusinessException;
 import org.demo.backend.member.application.dto.MemberDetail;
 import org.demo.backend.member.controller.dto.MemberCreateRequest;
+import org.demo.backend.member.controller.dto.PasswordChangeRequest;
 import org.demo.backend.member.domain.Member;
 import org.demo.backend.member.domain.MemberErrorCode;
 import org.demo.backend.member.domain.MemberRepository;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @Transactional(readOnly = true)
@@ -45,7 +48,7 @@ public class MemberJpaService implements MemberService {
                 Member.of(
                         request.getEmail(),
                         encodedPassword,
-                        NicknameUtils.generate(),
+                        generateUniqueNickname(),
                         profileImageProperties.getDefaultImageUrl(),
                         LocalDateTime.now()
                 )
@@ -69,5 +72,30 @@ public class MemberJpaService implements MemberService {
         // 2. 파일 삭제
         // 3. 회원 삭제
         memberRepository.deleteById(foundMember.getId());
+    }
+
+    @Override
+    @Transactional
+    public String changePassword(PasswordChangeRequest request) {
+        String rePassword = "1234";
+        Member member = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException(MemberErrorCode.NOT_FOUND));
+        member.updatePassword(passwordEncoder.encode(rePassword));
+        return rePassword;
+    }
+
+    // 고유한 닉네임 생성
+    private String generateUniqueNickname() {
+        final int MAX_RETRY_COUNT = 5;
+        for (int i = 0; i < MAX_RETRY_COUNT; i++) {
+            String candidate = NicknameUtils.generate();
+            if (!memberRepository.existsByNickname(candidate)) {
+                return candidate;
+            }
+        }
+        // 5번 생성 시도에도 닉네임이 중복되면 1~9999의 숫자를 붙인다
+        String baseNickname = NicknameUtils.generate();
+        int randomNum = ThreadLocalRandom.current().nextInt(1, 10000);
+        return baseNickname + "-" + randomNum;
     }
 }

@@ -7,10 +7,12 @@ import java.util.concurrent.ThreadLocalRandom;
 public class NicknameUtils {
 
     private static final List<String> adjectives = Arrays.asList(
-            "춤추는", "잠자는", "밥먹는", "섹시한", "노래하는", "멋진", "세련된", "귀여운", "예쁜"
+            "춤추는", "잠자는", "밥먹는", "섹시한", "노래하는", "멋진", "세련된", "귀여운", "예쁜",
+            "행복한", "즐거운", "용감한", "영리한", "신나는", "달콤한", "시원한", "따뜻한", "빛나는"
     );
     private static final List<String> nouns = Arrays.asList(
-            "고래", "상어", "강아지", "고양이", "햄스터", "병아리", "원숭이", "송아지", "물개", "곰탱이"
+            "고래", "상어", "강아지", "고양이", "햄스터", "병아리", "원숭이", "송아지", "물개", "곰탱이",
+            "호랑이", "사자", "토끼", "다람쥐", "여우", "판다", "펭귄", "부엉이", "돌고래"
     );
 
     public static String generate() {

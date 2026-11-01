@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/axios';
 import './Login.css';
@@ -13,16 +13,16 @@ const Login = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const emailInputRef = useRef(null);
 
   useEffect(() => {
-    // URL 쿼리 스트링에서 'new' 파라미터 확인 (회원가입 후 진입 시 환영 메시지)
     const params = new URLSearchParams(location.search);
     if (params.get('new') !== null) {
       setShowWelcome(true);
     }
   }, [location]);
 
-  // 이메일 유효성 검사 함수
+  // 이메일 유효성 검사
   const validateEmail = (value) => {
     if (value.trim().length === 0) {
       setEmailError('이메일을 입력하세요');
@@ -37,7 +37,7 @@ const Login = () => {
     return true;
   };
 
-  // 비밀번호 유효성 검사 함수
+  // 비밀번호 유효성 검사
   const validatePassword = (value) => {
     if (value.trim().length === 0) {
       setPasswordError('비밀번호를 입력하세요');
@@ -112,7 +112,7 @@ const Login = () => {
         }
       }
 
-      // 어디에도 매칭되지 않거나 필드 에러가 아닌 일반 전역 에러인 경우
+      // 필드 에러가 아닌 일반 전역 에러인 경우
       if (!handled) {
         const fallbackMsg = Array.isArray(messages) ? messages.join(', ') : (messages || '이메일 또는 비밀번호가 올바르지 않습니다');
         setGlobalError(fallbackMsg);
@@ -120,10 +120,14 @@ const Login = () => {
     }
   };
 
+  // 비밀번호 찾기
   const handleFindPassword = async () => {
     if (email.trim().length === 0) {
       alert('임시 비밀번호를 전송할 이메일 주소를 입력해주세요');
       setEmailError('이메일을 입력하세요');
+      if (emailInputRef.current) {
+        emailInputRef.current.focus();
+      }
       return;
     }
 
@@ -136,10 +140,14 @@ const Login = () => {
 
     if (confirm('입력하신 이메일 주소로 임시 비밀번호를 전송하시겠습니까?')) {
       try {
-        const response = await api.post('/find-password', { email: email.trim() });
+        const response = await api.patch(
+          '/v1/members/change-password', 
+          { email: email.trim() },
+          { skipGlobalError: true }
+        );
         alert('임시 비밀번호가 발송되었습니다');
-        if (response.data && response.data.message) {
-          alert('임시 비밀번호: ' + response.data.message);
+        if (response.data.data && response.data.data) {
+          alert('임시 비밀번호: ' + response.data.data);
         }
       } catch (error) {
         const status = error.response?.status;
@@ -151,13 +159,11 @@ const Login = () => {
   return (
     <div className="login-wrapper">
       <div className="login-container">
-        {/* 회원가입 후 진입 시 표시되는 환영 메시지 */}
         {showWelcome && (
           <div id="welcome-message">
             회원가입을 환영합니다<br />로그인 후, 서비스를 이용해주시기 바랍니다
           </div>
         )}
-
         <div className="sign-in-box">
           <h2>로그인</h2>
           <form onSubmit={handleLogin} className="login-form">
@@ -165,6 +171,7 @@ const Login = () => {
               <input
                 type="text"
                 id="email"
+                ref={emailInputRef}
                 placeholder="이메일"
                 value={email}
                 onChange={(e) => {
@@ -189,9 +196,7 @@ const Login = () => {
               />
               {passwordError && <small className="error" style={{ display: 'block' }}>{passwordError}</small>}
             </div>
-
             {globalError && <small className="error global-error" style={{ display: 'block' }}>{globalError}</small>}
-
             <button type="submit" id="btn-sign-in" className="login-btn">로그인</button>
           </form>
           <p className="sign-in-box-more-action">

@@ -2,6 +2,7 @@ package org.demo.backend.member.application;
 
 import org.demo.backend.member.application.dto.MemberDetail;
 import org.demo.backend.member.controller.dto.MemberCreateRequest;
+import org.demo.backend.member.controller.dto.PasswordChangeRequest;
 
 public interface MemberService {
 
@@ -13,4 +14,7 @@ public interface MemberService {
 
     // 회원 삭제
     void deleteById(Long memberId);
+
+    // 비밀번호 변경
+    String changePassword(PasswordChangeRequest request);
 }

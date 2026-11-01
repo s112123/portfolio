@@ -7,6 +7,12 @@ spring:
     max-file-size: 1MB
     max-request-size: 10MB
     file-size-threshold: 2KB
+  sql:
+    init:
+      mode: always
+      platform: mysql
+  jpa:
+    defer-datasource-initialization: true
 
 jwt:
   secret-key: MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=
@@ -14,16 +20,6 @@ jwt:
     expiration: 600000     # 10분 (600000) → 1000 * 60 * 10 (ms)
   refresh-token:
     expiration: 86400000   # 1일 (86400000) → 1000 * 60 * 60 * 24 * 1 (ms)
-#
-#logging:
-#  level:
-#    org.hibernate.SQL: debug
-#    # 이 부분이 ?로 찍히던 실제 파라미터 값을 trace로 보여줍니다.
-#    org.hibernate.type.descriptor.sql.BasicBinder: trace
-
-logging:
-  level:
-    org.springframework.security: DEBUG
 
 ---
 app:

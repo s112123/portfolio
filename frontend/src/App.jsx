@@ -10,6 +10,7 @@ import PostWrite from './pages/PostWrite';
 import PostRead from './pages/PostRead';
 import PostEdit from './pages/PostEdit';
 import ErrorPage from './pages/ErrorPage';
+import NotFound from './pages/NotFound';
 import './index.css';
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
             <Route element={<PrivateRoute />}>
               <Route path="/profile" element={<Profile />} />
             </Route>
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
       </div>
