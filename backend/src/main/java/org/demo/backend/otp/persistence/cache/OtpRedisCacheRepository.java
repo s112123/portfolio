@@ -1,16 +1,14 @@
-package org.demo.backend.otp.persistence;
+package org.demo.backend.otp.persistence.cache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.backend.otp.domain.OtpCacheRepository;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 
 @Slf4j
-@Profile({"dev", "prod"})
 @Repository
 @RequiredArgsConstructor
 public class OtpRedisCacheRepository implements OtpCacheRepository {

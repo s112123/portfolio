@@ -12,6 +12,9 @@ public interface MemberJpaRepository extends JpaRepository<Member, Long> {
     // 이메일이 존재하는지 여부
     boolean existsByEmail(String email);
 
+    // 닉네임이 존재하는지 여부
+    boolean existsByNickname(String nickname);
+
     // 회원 조회
     @Query(value = "SELECT m FROM Member m LEFT JOIN FETCH m.profileImage WHERE m.email = :email")
     Optional<Member> findByEmail(@Param("email") String email);

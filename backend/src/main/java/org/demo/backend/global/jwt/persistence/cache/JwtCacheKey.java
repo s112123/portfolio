@@ -1,6 +1,6 @@
-package org.demo.backend.global.jwt.persistence;
+package org.demo.backend.global.jwt.persistence.cache;
 
-public class JwtCacheKey {
+public abstract class JwtCacheKey {
 
     // JWT 를 저장하는 키
     private static final String JWT_PREFIX = "jwt:";

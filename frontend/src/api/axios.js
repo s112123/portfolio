@@ -1,13 +1,14 @@
 import axios from 'axios';
 
-// 인증이 불필요한 퍼블릭 API 경로
-const PUBLIC_URLS = [
-  '/v1/health',
-  '/v1/otp/send/email',
-  '/v1/otp/verify/email',
-  '/v1/auth/signup', 
-  '/v1/auth/login',
-  '/v1/auth/refresh'
+// 인증이 불필요한 퍼블릭 API 목록 (HTTP Method와 URL 매칭 규칙 명시)
+const PUBLIC_APIS = [
+  { method: 'GET', url: '/v1/health' },
+  { method: 'POST', url: '/v1/otp/send/email' },
+  { method: 'POST', url: '/v1/otp/verify/email' },
+  { method: 'POST', url: '/v1/auth/signup' },
+  { method: 'POST', url: '/v1/auth/login' },
+  { method: 'POST', url: '/v1/auth/refresh' },
+  { method: 'PATCH', url: '/v1/members/change-password' },
 ];
 
 const api = axios.create({
@@ -21,8 +22,16 @@ const api = axios.create({
 // 요청 인터셉터
 api.interceptors.request.use(
   (config) => {
-    // console.log(`url=${config.url}`);
-    const isPublic = PUBLIC_URLS.some((url) => config.url?.includes(url));
+    const requestMethod = (config.method || 'get').toUpperCase();
+    const requestUrl = config.url || '';
+
+    // 요청 메서드와 URL이 퍼블릭 API 규칙에 정확히 부합하는지 확인
+    const isPublic = PUBLIC_APIS.some(
+      (apiRule) => 
+        apiRule.method.toUpperCase() === requestMethod && 
+        requestUrl.includes(apiRule.url)
+    );
+
     if (!isPublic) {
       const token = localStorage.getItem('itBlogAccessToken');
       if (token) {
@@ -41,7 +50,7 @@ api.interceptors.request.use(
 
 // 큐잉 처리를 위한 상태 변수
 let isRefreshing = false; // 현재 토큰을 갱신 중인지 여부
-let failedQueue = [];     // 갱신을 기다리는 요청들의 대기 큐
+let failedQueue = [];    // 갱신을 기다리는 요청들의 대기 큐
 
 // 대기 중인 요청들을 처리하는 함수
 const processQueue = (error, token = null) => {
@@ -61,6 +70,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // config 에 skipGlobalError 가 true 로 설정되어 있다면 전역 처리를 건너뛴다
+    if (originalRequest && originalRequest.skipGlobalError) {
+      return Promise.reject(error);
+    }
+
     // 404 에러
     if (error.response && error.response.status === 404) {
       const errorMessage = error.response.data?.message || '요청하신 리소스를 찾을 수 없습니다.';
@@ -72,16 +86,14 @@ api.interceptors.response.use(
     // 401 에러이고, 아직 재시도하지 않은 요청인 경우에만 처리
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
       // 리프레시를 시도하면 안 되는 퍼블릭 API 경로 (로그인, 회원가입 등)
-      const skipRefreshUrls = ['/auth/login', '/auth/signup', '/auth/refresh', '/auth/logout'];
+      const skipRefreshUrls = ['/auth/login', '/auth/refresh', '/auth/logout'];
       const isSkipUrl = skipRefreshUrls.some((url) => originalRequest.url?.includes(url));
 
       // 만약 리프레시 제외 대상 API에서 401이 난 거라면 토큰 갱신을 하지 않고 바로 에러 반환
       if (isSkipUrl) {
         // 만약 /auth/refresh 자체에서 401이 난 거라면 세션 만료 처리
-        // 리프레시 토큰이 만료되어 없는 경우, 서버에서 401 을 반환한다
         if (originalRequest.url.includes('/auth/refresh')) {
           localStorage.removeItem('itBlogAccessToken');
-          // alert('세션이 만료되었습니다. 다시 로그인해주세요.');
           window.location.href = '/login';
         }
         return Promise.reject(error);

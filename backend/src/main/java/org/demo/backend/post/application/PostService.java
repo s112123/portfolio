@@ -9,8 +9,8 @@ public interface PostService {
     // 글 등록
     Long create(Long writerId, PostCreateRequest request);
 
-    // 글 조회
-    PostDetail readById(Long postId);
+    // 글 조회 + 조회 수 캐시
+    PostDetail readByIdWithHitsCache(Long postId, String viewer, boolean liked);
 
     // 글 수정
     void update(Long memberId, Long postId, PostUpdateRequest request);

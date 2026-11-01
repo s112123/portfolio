@@ -8,9 +8,9 @@ import org.demo.backend.auth.controller.dto.LoginRequest;
 import org.demo.backend.global.exception.BusinessException;
 import org.demo.backend.global.jwt.application.JwtCacheService;
 import org.demo.backend.global.jwt.domain.JwtType;
-import org.demo.backend.global.jwt.persistence.JwtCacheKey;
+import org.demo.backend.global.jwt.persistence.cache.JwtCacheKey;
 import org.demo.backend.global.jwt.provider.JwtProvider;
-import org.demo.backend.global.lock.LockService;
+import org.demo.backend.global.lock.distributed.DistributedLockService;
 import org.demo.backend.global.security.CustomUserDetails;
 import org.demo.backend.member.domain.Member;
 import org.demo.backend.member.domain.MemberErrorCode;
@@ -18,9 +18,11 @@ import org.demo.backend.member.domain.MemberRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -32,7 +34,7 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final JwtCacheService jwtCacheService;
     private final MemberRepository memberRepository;
-    private final LockService lockService;
+    private final DistributedLockService distributedLockService;
 
     // 로그인
     public AuthDetail login(LoginRequest request) {
@@ -65,7 +67,7 @@ public class AuthService {
         // 락 키 생성
         // 사용자마다 서로 다른 Refresh Token 을 락 키로 잡기 때문에 독립적으로 락이 적용된다
         String lockKey = JwtCacheKey.generateLockKey(refreshToken);
-        return lockService.executeWithLock(lockKey, () -> refresh(refreshToken));
+        return distributedLockService.executeWithLock(lockKey, () -> refresh(refreshToken));
     }
 
     // JWT 갱신
@@ -99,7 +101,6 @@ public class AuthService {
                 accessToken,
                 token -> jwtCacheService.saveTokenInBlacklist(token, JwtType.ACCESS)
         );
-
         // 2. Access Token 을 블랙리스트에 넣음
         blacklistTokenIfPresent(
                 refreshToken,

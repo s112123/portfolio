@@ -2,12 +2,8 @@ package org.demo.backend.member.domain;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.demo.backend.post.domain.PostImageProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.util.List;
 
 @Component
 @ConfigurationProperties(prefix = "file-upload.member")

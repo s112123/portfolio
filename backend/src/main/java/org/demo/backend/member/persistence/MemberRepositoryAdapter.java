@@ -24,6 +24,11 @@ public class MemberRepositoryAdapter implements MemberRepository {
     }
 
     @Override
+    public boolean existsByNickname(String Nickname) {
+        return memberRepository.existsByNickname(Nickname);
+    }
+
+    @Override
     public Optional<Member> findById(Long memberId) {
         return memberRepository.findById(memberId);
     }

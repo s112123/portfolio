@@ -6,6 +6,7 @@ import org.demo.backend.global.api.dto.ApiResponse;
 import org.demo.backend.member.application.MemberService;
 import org.demo.backend.member.application.dto.MemberDetail;
 import org.demo.backend.member.controller.dto.MemberCreateRequest;
+import org.demo.backend.member.controller.dto.PasswordChangeRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +48,15 @@ public class MemberController {
     ) {
         MemberDetail memberDetail = memberService.readById(myId);
         return ResponseEntity.ok().body(ApiResponse.success(memberDetail));
+    }
+
+    // 비밀번호 변경
+    @PatchMapping("/change-password")
+    public ResponseEntity<ApiResponse<?>> changePassword(
+            @Valid @RequestBody PasswordChangeRequest request
+    ) {
+        String rePassword = memberService.changePassword(request);
+        return ResponseEntity.ok().body(ApiResponse.success(rePassword));
     }
 
     // 회원 삭제

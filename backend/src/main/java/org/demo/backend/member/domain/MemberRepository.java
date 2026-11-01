@@ -10,6 +10,9 @@ public interface MemberRepository {
     // 이메일이 존재하는지 여부
     boolean existsByEmail(String email);
 
+    // 닉네임이 존재하는지 여부
+    boolean existsByNickname(String Nickname);
+
     // 회원 조회
     Optional<Member> findById(Long memberId);
 

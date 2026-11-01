@@ -1,40 +1,39 @@
-package org.demo.backend.global.lock;
+package org.demo.backend.global.lock.distributed;
 
 import lombok.RequiredArgsConstructor;
 import org.demo.backend.global.exception.BusinessException;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
+import org.demo.backend.global.lock.LockErrorCode;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
-@Profile({"dev", "prod"})
+@Profile({"default", "test"})
 @Component
 @RequiredArgsConstructor
-public class LockRedissonService implements LockService {
+public class DistributedLockLocalService implements DistributedLockService {
 
-    private final RedissonClient redissonClient;
+    private final ConcurrentMap<String, ReentrantLock> lockMap = new ConcurrentHashMap<>();
 
     @Override
     public <T> T executeWithLock(String lockKey, Supplier<T> action) {
-        RLock lock = redissonClient.getLock(lockKey);
+        ReentrantLock lock = lockMap.computeIfAbsent(lockKey, k -> new ReentrantLock());
+        boolean available = false;
         try {
-            // 1. 락 획득 시도
-            // waitTime → 3초 대기 시간 / leasTime: 5초 동안 유지 후 자동 해제
-            boolean available = lock.tryLock(3, 5, TimeUnit.SECONDS);
+            available = lock.tryLock(3, TimeUnit.SECONDS);
             if (!available) {
                 throw new BusinessException(LockErrorCode.CURRENT_REQUEST_BLOCKED);
             }
-            // 2. 락 획득 시, 작업 실행
             return action.get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new BusinessException(LockErrorCode.CURRENT_REQUEST_BLOCKED);
         } finally {
-            // 락 자원 해제
-            if (lock.isHeldByCurrentThread()) {
+            if (available && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }

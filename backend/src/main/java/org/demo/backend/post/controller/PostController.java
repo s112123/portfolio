@@ -3,15 +3,16 @@ package org.demo.backend.post.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.backend.global.api.dto.ApiResponse;
+import org.demo.backend.like.application.PostLikeService;
 import org.demo.backend.post.application.PostService;
 import org.demo.backend.post.application.dto.PostDetail;
 import org.demo.backend.post.controller.dto.PostCreateRequest;
 import org.demo.backend.post.controller.dto.PostUpdateRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.net.URI;
 
@@ -22,6 +23,7 @@ import java.net.URI;
 public class PostController {
 
     private final PostService postService;
+    private final PostLikeService postLikeService;
 
     // 글 등록
     @PostMapping
@@ -37,9 +39,21 @@ public class PostController {
     // 글 조회
     @GetMapping("/{postId}")
     public ResponseEntity<ApiResponse<PostDetail>> readById(
-            @PathVariable("postId") Long postId
+            @PathVariable("postId") Long postId,
+            @AuthenticationPrincipal Long memberId,
+            HttpServletRequest request
     ) {
-        PostDetail postDetail = postService.readById(postId);
+        // 1. 뷰어는 회원인 경우, memberId 로 하고 비회원인 경우 IP 로 한다
+        String viewer = "ip:" + getClientIp(request);
+        boolean liked = false;
+        if (memberId != null) {
+            viewer = "member:" + memberId;
+            // 로그인 회원인 경우, 이 글을 좋아요 했는지 여부 확인
+            liked = postLikeService.existsByMemberIdAndPostId(memberId, postId);
+        }
+
+        // 3. 글 조회 및 조회 수 캐시
+        PostDetail postDetail = postService.readByIdWithHitsCache(postId, viewer, liked);
         return ResponseEntity.ok().body(ApiResponse.success(postDetail));
     }
 
@@ -54,9 +68,34 @@ public class PostController {
         return ResponseEntity.ok().body(ApiResponse.success());
     }
 
+
+
     // 글 삭제
 
     // 글 목록 → 정렬
 
     // 글 검색
+
+    // IP 추출
+    private String getClientIp(HttpServletRequest request) {
+        // 프록시 서버에서 온 요청인 경우, 백엔드는 프록시 서버의 IP 만 알 수 있다
+        // 그래서 프록시 서버인지 관련 헤더를 검사한다
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_CLIENT_IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
+    }
 }
