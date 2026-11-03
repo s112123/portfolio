@@ -11,35 +11,35 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MemberRepositoryAdapter implements MemberRepository {
 
-    private final MemberJpaRepository memberRepository;
+    private final MemberJpaRepository memberJpaRepository;
 
     @Override
     public Member save(Member member) {
-        return memberRepository.save(member);
+        return memberJpaRepository.save(member);
     }
 
     @Override
     public boolean existsByEmail(String email) {
-        return memberRepository.existsByEmail(email);
+        return memberJpaRepository.existsByEmail(email);
     }
 
     @Override
     public boolean existsByNickname(String Nickname) {
-        return memberRepository.existsByNickname(Nickname);
+        return memberJpaRepository.existsByNickname(Nickname);
     }
 
     @Override
     public Optional<Member> findById(Long memberId) {
-        return memberRepository.findById(memberId);
+        return memberJpaRepository.findById(memberId);
     }
 
     @Override
     public void deleteById(Long memberId) {
-        memberRepository.deleteById(memberId);
+        memberJpaRepository.deleteById(memberId);
     }
 
     @Override
     public Optional<Member> findByEmail(String email) {
-        return memberRepository.findByEmail(email);
+        return memberJpaRepository.findByEmail(email);
     }
 }

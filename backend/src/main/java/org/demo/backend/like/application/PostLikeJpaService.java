@@ -7,10 +7,10 @@ import org.demo.backend.like.domain.PostLikeErrorCode;
 import org.demo.backend.like.domain.PostLikeRepository;
 import org.demo.backend.member.domain.Member;
 import org.demo.backend.member.domain.MemberErrorCode;
-import org.demo.backend.member.persistence.MemberRepositoryAdapter;
+import org.demo.backend.member.domain.MemberRepository;
 import org.demo.backend.post.domain.Post;
 import org.demo.backend.post.domain.PostErrorCode;
-import org.demo.backend.post.persistence.PostRepositoryAdapter;
+import org.demo.backend.post.domain.PostRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,25 +19,25 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PostLikeJpaService implements PostLikeService {
 
-    private final MemberRepositoryAdapter memberRepositoryAdapter;
-    private final PostRepositoryAdapter postRepositoryAdapter;
+    private final MemberRepository memberRepository;
+    private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
 
     @Override
     @Transactional
     public void like(Long memberId, Long postId) {
         // 1. 회원 조회
-        Member member = memberRepositoryAdapter.findById(memberId)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(MemberErrorCode.NOT_FOUND));
         // 2. 포스트 조회
-        Post post = postRepositoryAdapter.findById(postId)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.NOT_FOUND));
 
         try {
             // 3. 좋아요 등록
             postLikeRepository.savePostLike(PostLike.of(member, post));
             // 4. 좋아요 +1 증가 (동시성 문제 해결 → 원자적 업데이트)
-            postRepositoryAdapter.incrementPostLike(postId);
+            postRepository.incrementPostLike(postId);
         } catch (DataIntegrityViolationException e) {
             throw new BusinessException(PostLikeErrorCode.ALREADY_LIKES);
         }
@@ -52,7 +52,7 @@ public class PostLikeJpaService implements PostLikeService {
         // 2. 좋아요 취소 (삭제)
         postLikeRepository.deleteById(postLike.getId());
         // 2. 좋아요 -1 감소 (동시성 문제 해결 → 원자적 업데이트 + p.likes > 0 조건으로 0 이하 방지)
-        postRepositoryAdapter.decrementPostLike(postId);
+        postRepository.decrementPostLike(postId);
     }
 
     @Override

@@ -3,9 +3,9 @@ package org.demo.backend.post.domain;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.demo.backend.comment.domain.Comment;
 import org.demo.backend.global.jpa.BaseTimeEntity;
 import org.demo.backend.member.domain.Member;
-import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -44,9 +44,11 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @BatchSize(size = 100)
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostImage> postImages = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     public static Post of(String title, String content) {
         Post post = new Post();
@@ -69,5 +71,10 @@ public class Post extends BaseTimeEntity {
 
     public void updateThumbUrl(String thumbUrl) {
         this.thumbUrl = thumbUrl;
+    }
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+        comment.assignPost(this);
     }
 }

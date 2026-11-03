@@ -1,6 +1,7 @@
 package org.demo.backend.member.application.dto;
 
 import lombok.Getter;
+import org.demo.backend.comment.persistence.CommentProjection;
 import org.demo.backend.member.domain.Member;
 import org.demo.backend.member.domain.MemberRole;
 
@@ -28,6 +29,14 @@ public class MemberDetail {
             detail.profileImage = ProfileImageDetail.of(member.getProfileImage());
         }
         detail.registeredAt = member.getRegisteredAt();
+        return detail;
+    }
+
+    public static MemberDetail ofCommentProject(CommentProjection projection) {
+        MemberDetail detail = new MemberDetail();
+        detail.id = projection.getWriterId();
+        detail.nickname = projection.getWriterNickname();
+        detail.profileImageUrl = projection.getWriterProfileImageUrl();
         return detail;
     }
 }

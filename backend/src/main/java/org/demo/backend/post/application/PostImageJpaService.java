@@ -6,11 +6,7 @@ import org.demo.backend.global.file.FileUtils;
 import org.demo.backend.global.file.dto.FileDetail;
 import org.demo.backend.global.file.dto.FileUploadRequest;
 import org.demo.backend.post.application.dto.PostImageDetail;
-import org.demo.backend.post.domain.PostImage;
-import org.demo.backend.post.domain.PostImageErrorCode;
-import org.demo.backend.post.domain.PostImageProperties;
-import org.demo.backend.post.domain.PostImageStatus;
-import org.demo.backend.post.persistence.PostImageRepositoryAdapter;
+import org.demo.backend.post.domain.*;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
@@ -28,7 +24,7 @@ public class PostImageJpaService implements PostImageService{
 
     private final PostImageProperties postImageProperties;
     private final ResourceLoader resourceLoader;
-    private final PostImageRepositoryAdapter postImageRepositoryAdapter;
+    private final PostImageRepository postImageRepository;
 
     @Override
     @Transactional
@@ -44,7 +40,7 @@ public class PostImageJpaService implements PostImageService{
                 postImageProperties.getImageUrl(fileDetail.getStoredFilename()),
                 PostImageStatus.TEMP
         );
-        return PostImageDetail.of(postImageRepositoryAdapter.save(postImage));
+        return PostImageDetail.of(postImageRepository.save(postImage));
     }
 
     @Override
