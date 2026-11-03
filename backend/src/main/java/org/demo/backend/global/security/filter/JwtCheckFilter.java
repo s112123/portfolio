@@ -100,17 +100,12 @@ public class JwtCheckFilter extends OncePerRequestFilter {
         // 게시글 조회 API 인 경우, 회원과 비회원이 모두 조회할 수 있는 공개 API 여야 한다
         // 하지만 게시글 조회 수 캐시에서 중복 조회 카운팅을 예방하기 위해 회원인 경우, memberId 가 필요하다
         // 그래서 회원인 경우, JWT 예외가 발생해도 예외로 응답하지 않고 넘긴다
-        if (method.equalsIgnoreCase("GET") && antPathMatcher.match("/api/v1/posts/*", uri)) {
-            return true;
+        if (method.equalsIgnoreCase("GET")) {
+            // 게시글 조회 및 댓글 조회 등 공개된 리소스는 토큰이 깨져도 401을 뱉지 않게 처리
+            if (antPathMatcher.match("/api/v1/posts/*", uri) || antPathMatcher.match("/api/v1/comments/", uri)) {
+                return true;
+            }
         }
-
-//        if (method.equalsIgnoreCase("GET")) {
-//            // 게시글 조회 및 댓글 조회 등 공개된 리소스는 토큰이 깨져도 401을 뱉지 않게 처리
-//            if (antPathMatcher.match("/api/v1/posts/**", uri) ||
-//                    antPathMatcher.match("/api/v1/comments/**", uri)) {
-//                return true;
-//            }
-//        }
         return false;
     }
 
@@ -146,11 +141,11 @@ public class JwtCheckFilter extends OncePerRequestFilter {
         if (requestURI.equals("/api/v1/members")) {
             return requestMethod.equalsIgnoreCase("POST");
         }
-        // "/api/v1/profile-images" 로 시작하는 경로는 POST 만 공개 허용하고 나머지는 JWT 를 검증한다
+        // "/api/v1/profile-images" 로 시작하는 경로는 GET 만 공개 허용하고 나머지는 JWT 를 검증한다
         if (requestURI.startsWith("/api/v1/profile-images")) {
             return requestMethod.equalsIgnoreCase("GET");
         }
-        // "/api/v1/post-images" 로 시작하는 경로는 POST 만 공개 허용하고 나머지는 JWT 를 검증한다
+        // "/api/v1/post-images" 로 시작하는 경로는 GET 만 공개 허용하고 나머지는 JWT 를 검증한다
         if (requestURI.startsWith("/api/v1/post-images")) {
             return requestMethod.equalsIgnoreCase("GET");
         }

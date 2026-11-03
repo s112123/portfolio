@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .antMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/v1/post-images/**").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/v1/posts/*").permitAll()
+                        .antMatchers(HttpMethod.GET, "/api/v1/comments").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
                 .build();

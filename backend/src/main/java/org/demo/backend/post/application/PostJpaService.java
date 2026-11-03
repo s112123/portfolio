@@ -8,12 +8,7 @@ import org.demo.backend.member.persistence.MemberRepositoryAdapter;
 import org.demo.backend.post.application.dto.PostDetail;
 import org.demo.backend.post.controller.dto.PostCreateRequest;
 import org.demo.backend.post.controller.dto.PostUpdateRequest;
-import org.demo.backend.post.domain.Post;
-import org.demo.backend.post.domain.PostErrorCode;
-import org.demo.backend.post.domain.PostHitsCacheRepository;
-import org.demo.backend.post.domain.PostImageProperties;
-import org.demo.backend.post.persistence.PostImageRepositoryAdapter;
-import org.demo.backend.post.persistence.PostRepositoryAdapter;
+import org.demo.backend.post.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,24 +23,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PostJpaService implements PostService {
 
-    private final MemberRepositoryAdapter memberRepositoryAdapter;
+    private final MemberRepositoryAdapter memberRepository;
     private final PostImageProperties postImageProperties;
-    private final PostRepositoryAdapter postRepositoryAdapter;
-    private final PostImageRepositoryAdapter postImageRepositoryAdapter;
+    private final PostRepository postRepository;
+    private final PostImageRepository postImageRepository;
     private final PostHitsCacheRepository postHitsCacheRepository;
 
     @Override
     @Transactional
     public Long create(Long writerId, PostCreateRequest request) {
         // 1. 작성자 조회
-        Member writer = memberRepositoryAdapter.findById(writerId)
+        Member writer = memberRepository.findById(writerId)
                 .orElseThrow(() -> new BusinessException(MemberErrorCode.NOT_FOUND));
 
         // 2. 글 등록
         Post post = Post.of(request.getTitle(), request.getContent());
         post.assignMember(writer);
         post.updateThumbUrl(postImageProperties.getDefaultImageUrl());
-        Post savedPost = postRepositoryAdapter.save(post);
+        Post savedPost = postRepository.save(post);
 
         // 3. 이미지 파일 정보 변경 (벌크)
         List<String> filenamesInContent = extractFilenames(request.getContent());
@@ -54,7 +49,7 @@ public class PostJpaService implements PostService {
             // 글 등록할 때, 사용된 임시 이미지는 DB 에서 "TEMP" 로 저장되어 있고 FK 는 null 이다
             // 최종 포함된 이미지 파일명은 고유하게 저장되어 있으므로 파일명으로 모두 조회하여 상태를 "ATTACHED" 로 변경한다
             // 그리고 FK 값을 넣어준다
-            postImageRepositoryAdapter.attachImages(savedPost, filenamesInContent);
+            postImageRepository.attachImages(savedPost, filenamesInContent);
             // 썸네일 경로 업데이트
             savedPost.updateThumbUrl(postImageProperties.getFirstImageUrl(filenamesInContent));
         }
@@ -64,7 +59,7 @@ public class PostJpaService implements PostService {
     @Override
     public PostDetail readByIdWithHitsCache(Long postId, String viewer, boolean liked) {
         // 1. 게시물 조회
-        Post post = postRepositoryAdapter.fetchById(postId)
+        Post post = postRepository.fetchById(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.NOT_FOUND));
         // 2. 조회 수 증분
         Long incrementedHits = postHitsCacheRepository.addViewerAndIncrementDelta(postId, viewer);
@@ -75,7 +70,7 @@ public class PostJpaService implements PostService {
     @Transactional
     public void update(Long writerId, Long postId, PostUpdateRequest request) {
         // 1. 게시물 조회
-        Post post = postRepositoryAdapter.fetchById(postId)
+        Post post = postRepository.fetchById(postId)
                 .orElseThrow(() -> new BusinessException(PostErrorCode.NOT_FOUND));
         if (!post.getMember().getId().equals(writerId)) {
             throw new BusinessException(MemberErrorCode.UNAUTHORIZED);
@@ -94,20 +89,20 @@ public class PostJpaService implements PostService {
             post.updateThumbUrl(postImageProperties.getDefaultImageUrl());
         }
         post.update(request.getTitle(), request.getContent());
-        Post updatedPost = postRepositoryAdapter.save(post);
+        Post updatedPost = postRepository.save(post);
 
         // 5. 각 이미지의 상태 변경
         // 새롭게 추가된 이미지를 추출하고 상태는 TEMP 에서 ATTACHED 로 변경
         List<String> addedFilenames = getAddedFilenames(oldImageFilenames, newImageFilenames);
         if (!addedFilenames.isEmpty()) {
-            postImageRepositoryAdapter.attachImages(updatedPost, addedFilenames);
+            postImageRepository.attachImages(updatedPost, addedFilenames);
         }
         // 삭제될 기존 이미지를 추출하고 상태는 ATTACHED 에서 TEMP 로 변경
         // TEMP 로 변경해두면 스케쥴러가 DB 와 물리 파일을 처리한다
         // 참고: DB 에서 상태 변경 대신 removedFilenames 을 즉시 삭제를 해도 된다 → 단, 물리 파일 삭제는 직접 처리 필요
         List<String> removedFilenames = getRemovedFilenames(oldImageFilenames, newImageFilenames);
         if (!removedFilenames.isEmpty()) {
-            postImageRepositoryAdapter.detachImages(removedFilenames);
+            postImageRepository.detachImages(removedFilenames);
         }
 
         // TODO: 글을 캐시하는 경우, 기존의 캐시를 삭제한다

@@ -1,110 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
 import './Comment.css';
 
-// 날짜 포맷팅 함수 (yyyy-MM-dd HH:mm:ss)
 const formatDateTime = (dateString) => {
   if (!dateString) return '';
   const replaced = dateString.replace('T', ' ');
   return replaced.split('.')[0];
 };
 
-// [화면 테스트용 임시 샘플 데이터]
-const MOCK_COMMENTS_PAGE_1 = [
-  {
-    id: 1,
-    content: '조희대대법장이 임기종료 되고 제2의김명수가 임명되면 끝장납니다!! 그전에 끝나야 하지요..시간가는게...',
-    registeredAt: '2026-03-30T10:15:30.000',
-    parentId: null,
-    writer: {
-      id: 'user01',
-      nickname: '@이상용-b6i',
-      profileImageUrl: 'https://via.placeholder.com/28/007bff/ffffff?text=A'
-    }
-  },
-  {
-    id: 2,
-    content: '조씨는 허수아비',
-    registeredAt: '2026-03-30T10:20:00.000',
-    parentId: 1,
-    writer: {
-      id: 'user02',
-      nickname: '@이상근-v6n',
-      profileImageUrl: 'https://via.placeholder.com/28/28a745/ffffff?text=B'
-    }
-  },
-  {
-    id: 3,
-    content: '이제는 달라져야 하는데 쫄...',
-    registeredAt: '2026-03-30T11:00:12.000',
-    parentId: 1,
-    writer: {
-      id: 'user03',
-      nickname: '@여이현옥-v3z',
-      profileImageUrl: 'https://via.placeholder.com/28/dc3545/ffffff?text=C'
-    }
-  },
-  {
-    id: 4,
-    content: '두 번째 원본 댓글입니다. (독립된 스레드)',
-    registeredAt: '2026-03-30T11:30:45.000',
-    parentId: null,
-    writer: {
-      id: 'myMemberId',
-      nickname: '@테스터-me',
-      profileImageUrl: 'https://via.placeholder.com/28/ffc107/333333?text=Me'
-    }
-  }
-];
-
-const MOCK_COMMENTS_PAGE_2 = [
-  {
-    id: 5,
-    content: '2페이지의 첫 번째 댓글입니다.',
-    registeredAt: '2026-03-30T13:00:00.000',
-    parentId: null,
-    writer: {
-      id: 'user05',
-      nickname: '@테스터5',
-      profileImageUrl: 'https://via.placeholder.com/28/17a2b8/ffffff?text=E'
-    }
-  }
-];
-
 export default function Comment({ postId, currentUser }) {
-  const [comments, setComments] = useState([]);
-  const [commentContent, setCommentContent] = useState('');
-  const [commentPage, setCommentPage] = useState(1);
-  const [commentTotalPages, setCommentTotalPages] = useState(2);
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  
+  const [commentData, setCommentData] = useState({
+    content: [],
+    currentPage: 1,
+    totalPages: 0,
+    hasPrevious: false,
+    hasNext: false,
+    totalElements: 0,
+    size: 5
+  });
 
-  // 답글(대댓글) 작성 상태 관리용
+  const [currentPage, setCurrentPage] = useState(1);
+  const [commentContent, setCommentContent] = useState('');
+
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyingToNickname, setReplyingToNickname] = useState(''); 
   const [replyContent, setReplyContent] = useState('');
 
+  const replyInputRef = useRef(null);
+
+  const getProfileImageUrl = (profileImageUrl) => {
+    if (!profileImageUrl) return 'https://via.placeholder.com/24';
+    if (profileImageUrl.startsWith('http')) return profileImageUrl;
+    return `${baseUrl}${profileImageUrl}`;
+  };
+
   useEffect(() => {
-    fetchComments(1);
-  }, [postId]);
+    fetchComments(currentPage);
+  }, [postId, currentPage]);
 
-  const fetchComments = async (page = 1) => {
+  useEffect(() => {
+    if (replyingTo !== null && replyInputRef.current) {
+      replyInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      replyInputRef.current.focus();
+    }
+  }, [replyingTo]);
+
+  const fetchComments = async (page) => {
     try {
-      // 추후 실제 API 연동 시 주석 해제
-      // const response = await api.get(`/v1/posts/${postId}/comments?page=${page}&size=5`);
-      // setComments(response.data.data.content);
-      // setCommentTotalPages(response.data.data.totalPages);
-
-      if (page === 1) {
-        setComments(MOCK_COMMENTS_PAGE_1);
-      } else {
-        setComments(MOCK_COMMENTS_PAGE_2);
-      }
-      setCommentTotalPages(2);
-      setCommentPage(page);
+      const response = await api.get(`/v1/comments?postId=${postId}&page=${page}`); 
+      setCommentData(response.data.data);
     } catch (error) {
       console.error('댓글 조회 실패:', error);
     }
   };
 
+  // 일반 댓글 등록
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!currentUser) {
@@ -113,90 +65,114 @@ export default function Comment({ postId, currentUser }) {
     }
     if (!commentContent.trim()) return;
 
-    const newComment = {
-      id: Date.now(),
-      content: commentContent,
-      registeredAt: new Date().toISOString(),
-      parentId: null,
-      writer: {
-        id: currentUser.memberId,
-        nickname: '@나(로그인유저)',
-        profileImageUrl: 'https://via.placeholder.com/28/ffc107/333333?text=Me'
+    try {
+      const requestData = {
+        postId: postId,
+        writerId: currentUser.memberId,
+        content: commentContent,
+        parentId: null
+      };
+
+      await api.post('/v1/comments', requestData);
+      setCommentContent('');
+      
+      if (currentPage === 1) {
+        fetchComments(1);
+      } else {
+        setCurrentPage(1);
       }
-    };
-    setComments(prev => [newComment, ...prev]);
-    setCommentContent('');
+    } catch (error) {
+      console.error('댓글 등록 실패:', error);
+      alert(error.response?.data?.message || '댓글 등록에 실패했습니다.');
+    }
   };
 
-  const handleReplySubmit = async (parentCommentId) => {
+  // 답글 등록
+  const handleReplySubmit = async (targetCommentId) => {
     if (!currentUser) {
       alert('로그인 후 이용해주세요.');
       return;
     }
     if (!replyContent.trim()) return;
 
-    const newReply = {
-      id: Date.now(),
-      content: replyContent,
-      registeredAt: new Date().toISOString(),
-      parentId: parentCommentId,
-      writer: {
-        id: currentUser.memberId,
-        nickname: '@나(로그인유저)',
-        profileImageUrl: 'https://via.placeholder.com/28/ffc107/333333?text=Me'
-      }
-    };
-    
-    const targetIndex = comments.findIndex(c => c.id === parentCommentId);
-    if (targetIndex !== -1) {
-      const updated = [...comments];
-      updated.splice(targetIndex + 1, 0, newReply);
-      setComments(updated);
-    } else {
-      setComments(prev => [...prev, newReply]);
-    }
+    try {
+      const requestData = {
+        postId: postId,
+        writerId: currentUser.memberId,
+        content: replyContent,
+        parentId: targetCommentId
+      };
 
-    setReplyContent('');
-    setReplyingTo(null);
-    setReplyingToNickname('');
+      await api.post('/v1/comments', requestData);
+
+      setReplyContent('');
+      setReplyingTo(null);
+      setReplyingToNickname('');
+      
+      fetchComments(currentPage);
+    } catch (error) {
+      console.error('답글 등록 실패:', error);
+      alert(error.response?.data?.message || '답글 등록에 실패했습니다.');
+    }
   };
 
   const handleCommentDelete = async (commentId) => {
     if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
-    setComments(prev => prev.filter(c => c.id !== commentId));
+    try {
+      await api.delete(`/v1/comments/${commentId}`);
+      fetchComments(currentPage);
+    } catch (error) {
+      console.error('댓글 삭제 실패:', error);
+      alert(error.response?.data?.message || '댓글 삭제에 실패했습니다.');
+    }
   };
+
+  const maxPageButtons = 5;
+  const currentBlock = Math.ceil(commentData.currentPage / maxPageButtons);
+  const startPage = (currentBlock - 1) * maxPageButtons + 1;
+  const endPage = Math.min(startPage + maxPageButtons - 1, commentData.totalPages);
 
   return (
     <div className="comments-section">
-      <h3>댓글</h3>
-      
-      {/* 새 댓글 작성 폼 */}
+      <h3>댓글 ({commentData.totalElements})</h3>
       <form onSubmit={handleCommentSubmit} className="comment-form">
-        <textarea 
-          placeholder={currentUser ? "댓글을 남겨주세요" : "로그인 후 댓글을 남겨주세요."}
-          value={commentContent}
-          onChange={(e) => setCommentContent(e.target.value)}
-          disabled={!currentUser} 
-          className="comment-input"
-          style={{ backgroundColor: !currentUser ? '#f8f9fa' : '#fff' }}
-        />
+        <div className="comment-input-container">
+          <textarea 
+            placeholder={currentUser ? "댓글을 입력해주세요" : "로그인 후 댓글을 입력해주세요"}
+            value={commentContent}
+            onChange={(e) => setCommentContent(e.target.value)}
+            // 💡 1번 개선점: 메인 댓글 입력창을 클릭(포커스)하면 열려있던 답글창을 닫아줍니다.
+            onFocus={() => {
+              setReplyingTo(null);
+              setReplyingToNickname('');
+              setReplyContent('');
+            }}
+            maxLength={100}
+            disabled={!currentUser} 
+            className={`comment-input ${!currentUser ? 'disabled' : ''}`}
+          />
+          <span className="comment-char-counter">
+            {commentContent.length} / 100자
+          </span>
+        </div>
+
         {currentUser && (
-          <button type="submit" className="btn-comment-submit">
-            등록
-          </button>
+          <button type="submit" className="btn-comment-submit">등록</button>
         )}
       </form>
 
-      {/* 댓글 목록 */}
       <div className="comment-list">
-        {comments.map((comment) => {
+        {commentData.content.map((comment) => {
           const isCommentWriter = currentUser && String(currentUser.memberId) === String(comment.writer?.id);
           const isReply = comment.parentId !== null && comment.parentId !== undefined;
 
+          // 💡 2번 문제 해결을 위한 팁: 
+          // 현재 페이지 목록에 부모가 없으면 comment.parentWriterNickname 같은 서버 응답 값을 쓰거나 '상대방'으로 표시해야 합니다.
           let parentWriterNickname = '';
           if (isReply) {
-            const parentComment = comments.find(c => c.id === comment.parentId);
-            parentWriterNickname = parentComment ? parentComment.writer?.nickname : '상대방';
+            const parentComment = commentData.content.find(c => c.id === comment.parentId);
+            // 만약 현재 페이지에 부모가 없다면 comment.parentWriterNickname (백엔드 추가 권장) 혹은 기본값 사용
+            parentWriterNickname = parentComment ? parentComment.writer?.nickname : (comment.parentWriterNickname || '상대방');
           }
 
           return (
@@ -204,34 +180,36 @@ export default function Comment({ postId, currentUser }) {
               key={comment.id} 
               className={`comment-item ${isReply ? 'comment-reply-item' : ''}`}
             >
-              {/* 상단 프로필 + 닉네임 + 날짜 */}
               <div className="comment-meta-header">
                 <img 
-                  src={comment.writer?.profileImageUrl || 'https://via.placeholder.com/24'} 
+                  src={getProfileImageUrl(comment.writer?.profileImageUrl)} 
                   alt="프로필" 
                   className="comment-profile-img" 
                 />
                 <span className="comment-writer">
                   {comment.writer?.nickname || '익명'}
+                  {comment.isPostAuthor && (
+                    <span className="comment-author-badge">
+                      작성자
+                    </span>
+                  )}
                 </span>
                 <span className="comment-date">
                   {formatDateTime(comment.registeredAt)}
                 </span>
               </div>
 
-              {/* 댓글 본문 */}
               <p className="comment-text">
                 {isReply && (
-                  <span style={{ color: '#007bff', fontWeight: 'bold', marginRight: '6px' }}>
+                  <span className="comment-mention">
                     @{parentWriterNickname}
                   </span>
                 )}
                 {comment.content}
               </p>
 
-              {/* 하단 액션 (답글 / 삭제) */}
               <div className="comment-actions">
-                {!isReply && currentUser && (
+                {currentUser && (
                   <button 
                     type="button" 
                     onClick={() => {
@@ -261,7 +239,6 @@ export default function Comment({ postId, currentUser }) {
                 )}
               </div>
 
-              {/* 답글 입력 상자 */}
               {replyingTo === comment.id && (
                 <div className="reply-form">
                   <div className="reply-form-header">
@@ -283,11 +260,16 @@ export default function Comment({ postId, currentUser }) {
 
                   <div className="reply-input-wrapper">
                     <textarea 
-                      placeholder="답글을 남겨주세요..."
+                      ref={replyInputRef}
+                      placeholder="답글을 입력해주세요"
                       value={replyContent}
                       onChange={(e) => setReplyContent(e.target.value)}
+                      maxLength={100}
                       className="reply-input"
                     />
+                    <span className="reply-char-counter">
+                      {replyContent.length} / 100자
+                    </span>
                     <button 
                       type="button" 
                       onClick={() => handleReplySubmit(comment.id)}
@@ -303,18 +285,41 @@ export default function Comment({ postId, currentUser }) {
         })}
       </div>
 
-      {/* 페이지네이션 */}
-      {commentTotalPages > 1 && (
+      {commentData.totalPages > 1 && (
         <div className="comment-pagination">
-          {Array.from({ length: commentTotalPages }, (_, index) => index + 1).map((pageNum) => (
+          {startPage > 1 && (
             <button
-              key={pageNum}
-              onClick={() => fetchComments(pageNum)}
-              className={`btn-page ${commentPage === pageNum ? 'active' : ''}`}
+              type="button"
+              onClick={() => setCurrentPage(startPage - 1)}
+              className="btn-page"
             >
-              {pageNum}
+              &lt;
             </button>
-          ))}
+          )}
+
+          {Array.from({ length: (endPage - startPage + 1) }, (_, index) => {
+            const pageNum = startPage + index;
+            return (
+              <button
+                key={pageNum}
+                type="button"
+                onClick={() => setCurrentPage(pageNum)}
+                className={`btn-page ${currentPage === pageNum ? 'active' : ''}`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          {endPage < commentData.totalPages && (
+            <button
+              type="button"
+              onClick={() => setCurrentPage(endPage + 1)}
+              className="btn-page"
+            >
+              &gt;
+            </button>
+          )}
         </div>
       )}
     </div>

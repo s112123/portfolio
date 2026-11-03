@@ -11,25 +11,25 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PostLikeRepositoryAdapter implements PostLikeRepository {
 
-    private final PostLikeJpaRepository postLikeRepository;
+    private final PostLikeJpaRepository postLikeJpaRepository;
 
     @Override
     public PostLike savePostLike(PostLike postLike) {
-        return postLikeRepository.save(postLike);
+        return postLikeJpaRepository.save(postLike);
     }
 
     @Override
     public Optional<PostLike> findByMemberIdAndPostId(Long memberId, Long postId) {
-        return postLikeRepository.findByMemberIdAndPostId(memberId, postId);
+        return postLikeJpaRepository.findByMemberIdAndPostId(memberId, postId);
     }
 
     @Override
     public void deleteById(Long postLikeId) {
-        postLikeRepository.deleteById(postLikeId);
+        postLikeJpaRepository.deleteById(postLikeId);
     }
 
     @Override
     public boolean existsByMemberIdAndPostId(Long memberId, Long postId) {
-        return postLikeRepository.existsByMemberIdAndPostId(memberId, postId);
+        return postLikeJpaRepository.existsByMemberIdAndPostId(memberId, postId);
     }
 }

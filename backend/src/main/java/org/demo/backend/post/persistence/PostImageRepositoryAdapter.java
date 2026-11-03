@@ -15,35 +15,35 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PostImageRepositoryAdapter implements PostImageRepository {
 
-    private final PostImageJpaRepository postImageRepository;
+    private final PostImageJpaRepository postImageJpaRepository;
 
     @Override
     public PostImage save(PostImage postImage) {
-        return postImageRepository.save(postImage);
+        return postImageJpaRepository.save(postImage);
     }
 
     @Override
     public Optional<PostImage> findByStoredFilename(String storedFilename) {
-        return postImageRepository.findByStoredFilename(storedFilename);
+        return postImageJpaRepository.findByStoredFilename(storedFilename);
     }
 
     @Override
     public int attachImages(Post post, List<String> filenames) {
-        return postImageRepository.attachImages(post, filenames);
+        return postImageJpaRepository.attachImages(post, filenames);
     }
 
     @Override
     public int detachImages(List<String> filenames) {
-        return postImageRepository.detachImages(filenames);
+        return postImageJpaRepository.detachImages(filenames);
     }
 
     @Override
     public List<PostImage> findByStatusAndCreatedAtBefore(PostImageStatus status, LocalDateTime threshold) {
-        return postImageRepository.findByStatusAndCreatedAtBefore(status, threshold);
+        return postImageJpaRepository.findByStatusAndCreatedAtBefore(status, threshold);
     }
 
     @Override
     public void deleteAllInBatch(List<PostImage> postImages) {
-        postImageRepository.deleteAllInBatch(postImages);
+        postImageJpaRepository.deleteAllInBatch(postImages);
     }
 }

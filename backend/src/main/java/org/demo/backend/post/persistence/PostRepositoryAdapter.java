@@ -11,31 +11,31 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PostRepositoryAdapter implements PostRepository {
 
-    private final PostJpaRepository postRepository;
+    private final PostJpaRepository postJpaRepository;
 
 
     @Override
     public Post save(Post post) {
-        return postRepository.save(post);
+        return postJpaRepository.save(post);
     }
 
     @Override
     public Optional<Post> findById(Long postId) {
-        return postRepository.findById(postId);
+        return postJpaRepository.findById(postId);
     }
 
     @Override
     public Optional<Post> fetchById(Long postId) {
-        return postRepository.fetchById(postId);
+        return postJpaRepository.fetchById(postId);
     }
 
     @Override
     public int incrementPostLike(Long postId) {
-        return postRepository.incrementPostLike(postId);
+        return postJpaRepository.incrementPostLike(postId);
     }
 
     @Override
     public int decrementPostLike(Long postId) {
-        return postRepository.decrementPostLike(postId);
+        return postJpaRepository.decrementPostLike(postId);
     }
 }
