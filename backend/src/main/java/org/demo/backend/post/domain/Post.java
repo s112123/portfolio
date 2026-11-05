@@ -13,7 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "post")
+@Table(
+        name = "post",
+        indexes = {
+                // 인덱스 열 정렬이 가능한 MySQL 8.0+ 또는 MariaDB 10.6+ 인 경우 → columnList = "likes DESC, id DESC"
+                @Index(name = "idx_post_likes_id", columnList = "likes, id"),
+                @Index(name = "idx_post_hits_id", columnList = "hits, id")
+        }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post extends BaseTimeEntity {

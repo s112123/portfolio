@@ -93,7 +93,7 @@
 
 .sign-up-box .sign-up-item .sign-up-email-box .btn-sign-up-email button:hover,
 .sign-up-box .sign-up-item .sign-up-confirm-box .btn-sign-up-confirm button:hover {
-  background-color: #1a73e8;
+  background-color: #1557b0;
 }
 
 #btn-confirm-code {
@@ -140,4 +140,8 @@
   font-weight: 500;
   border-radius: 2px;
   cursor: pointer;
+}
+
+.sign-up-box #btn-sign-up:hover {
+  background-color: #1557b0; 
 }

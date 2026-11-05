@@ -1,6 +1,7 @@
 package org.demo.backend.post.application;
 
 import lombok.RequiredArgsConstructor;
+import org.demo.backend.global.api.dto.PageResult;
 import org.demo.backend.global.exception.BusinessException;
 import org.demo.backend.member.domain.Member;
 import org.demo.backend.member.domain.MemberErrorCode;
@@ -9,6 +10,7 @@ import org.demo.backend.post.application.dto.PostDetail;
 import org.demo.backend.post.controller.dto.PostCreateRequest;
 import org.demo.backend.post.controller.dto.PostUpdateRequest;
 import org.demo.backend.post.domain.*;
+import org.demo.backend.post.domain.cache.PostHitsCacheRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +65,7 @@ public class PostJpaService implements PostService {
                 .orElseThrow(() -> new BusinessException(PostErrorCode.NOT_FOUND));
         // 2. 조회 수 증분
         Long incrementedHits = postHitsCacheRepository.addViewerAndIncrementDelta(postId, viewer);
-        return PostDetail.of(post, post.getHits() + incrementedHits, liked);
+        return PostDetail.detailOf(post, post.getHits() + incrementedHits, liked);
     }
 
     @Override
@@ -106,6 +108,37 @@ public class PostJpaService implements PostService {
         }
 
         // TODO: 글을 캐시하는 경우, 기존의 캐시를 삭제한다
+    }
+
+    @Override
+    public PageResult<PostDetail> findAllInfiniteScroll(
+            SortType sortType,
+            Long lastPostId,
+            Long lastValue,
+            int size,
+            String keyword
+    ) {
+        // 1. 캐시 조회
+
+        // 2. 캐시에 없으면 조회
+        PageResult<Post> postsPaged = postRepository.fetchAllInfiniteScroll(
+                sortType,
+                lastPostId,
+                lastValue,
+                size,
+                keyword
+        );
+        PageResult<PostDetail> postDetailsPaged = postsPaged.map(post -> PostDetail.summaryOf(post));
+
+        // 3. 캐시 저장
+        List<PostDetail> postDetails = postDetailsPaged.getContent();
+        return postDetailsPaged;
+    }
+
+    @Override
+    public PageResult<PostDetail> findAllByMemberId(Long memberId, int page, int size) {
+        PageResult<Post> posts = postRepository.fetchPostsByDeferredJoinNative(memberId, page, size);
+        return posts.map(post -> PostDetail.summaryOfMyPost(post));
     }
 
     // 글 내용에서 <img> 태그에 있는 url 에서 파일 이름을 추출한다

@@ -15,13 +15,13 @@ public interface CommentJpaRepository extends JpaRepository<Comment, Long> {
     @Query(
             value = "WITH RECURSIVE CommentCTE AS (" +
                     "    SELECT id, content, registered_at, post_id, member_id, parent_id, " +
-                    "           CAST(id AS CHAR(200)) AS path, " +
+                    "           CAST(LPAD(id, 10, '0') AS CHAR(200)) AS path, " +
                     "           0 AS depth " +
                     "    FROM comment " +
                     "    WHERE post_id = :postId AND parent_id IS NULL " +
                     "    UNION ALL " +
                     "    SELECT c.id, c.content, c.registered_at, c.post_id, c.member_id, c.parent_id, " +
-                    "           CONCAT(cte.path, ' > ', c.id), " +
+                    "           CONCAT(cte.path, ' > ', LPAD(c.id, 10, '0')), " +
                     "           cte.depth + 1 " +
                     "    FROM comment c " +
                     "    JOIN CommentCTE cte ON c.parent_id = cte.id " +

@@ -3,7 +3,7 @@ package org.demo.backend.global.scheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import org.demo.backend.post.domain.PostHitsCacheRepository;
+import org.demo.backend.post.domain.cache.PostHitsCacheRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 

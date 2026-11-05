@@ -19,19 +19,18 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/error" element={<ErrorPage />} />
-          
           <Route element={<ServerCheckLayout />}>
             {/* 1. 퍼블릭 페이지 */}
             <Route path="/" element={<Main />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/post/write" element={<PostWrite />} />
             <Route path="/post/view" element={<PostRead />} />
-            <Route path="/post/edit" element={<PostEdit />} />
-
+            
             {/* 2. 보호된 페이지 */}
             <Route element={<PrivateRoute />}>
               <Route path="/profile" element={<Profile />} />
+              <Route path="/post/write" element={<PostWrite />} />
+              <Route path="/post/edit" element={<PostEdit />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Route>
