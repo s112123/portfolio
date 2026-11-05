@@ -1,10 +1,17 @@
 package org.demo.backend.post.persistence;
 
 import lombok.RequiredArgsConstructor;
+import org.demo.backend.global.api.dto.PageResult;
 import org.demo.backend.post.domain.Post;
 import org.demo.backend.post.domain.PostRepository;
+import org.demo.backend.post.domain.SortType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -12,7 +19,6 @@ import java.util.Optional;
 public class PostRepositoryAdapter implements PostRepository {
 
     private final PostJpaRepository postJpaRepository;
-
 
     @Override
     public Post save(Post post) {
@@ -37,5 +43,59 @@ public class PostRepositoryAdapter implements PostRepository {
     @Override
     public int decrementPostLike(Long postId) {
         return postJpaRepository.decrementPostLike(postId);
+    }
+
+    @Override
+    public PageResult<Post> fetchAllInfiniteScroll(
+            SortType sortType,
+            Long lastPostId,
+            Long lastValue,
+            int size,
+            String keyword
+    ) {
+        Pageable pageable = PageRequest.of(0, size);
+        Slice<Post> posts;
+
+        if (sortType == SortType.LIKES) {
+            posts = postJpaRepository.fetchAllInfiniteScrollByLikes(lastPostId, lastValue, keyword, pageable);
+        } else if (sortType == SortType.HITS) {
+            posts = postJpaRepository.fetchAllInfiniteScrollByHits(lastPostId, lastValue, keyword, pageable);
+        } else {
+            posts = postJpaRepository.fetchAllInfiniteScrollByLatest(lastPostId, keyword, pageable);
+        }
+
+        return PageResult.<Post>builder()
+                .content(posts.getContent())
+                .hasPrevious(posts.hasPrevious())
+                .hasNext(posts.hasNext())
+                .currentPage(posts.getNumber() + 1)
+                .size(size)
+                .build();
+    }
+
+    @Override
+    public PageResult<Post> fetchPostsByDeferredJoinNative(Long memberId, int page, int size) {
+        // 오프셋
+        int offset = (page - 1) * size;
+        // 전체 데이터
+        List<Post> content = postJpaRepository.findPostsByDeferredJoinNative(memberId, offset, size);
+        // 전체 데이터 개수
+        long totalElements = postJpaRepository.countByMemberIdNative(memberId);
+        // 전체 페이지 수
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        // 이전 버튼
+        boolean hasPrevious = page > 1;
+        // 다음 버튼
+        boolean hasNext = page < totalPages;
+
+        return PageResult.<Post>builder()
+                .content(content)
+                .currentPage(page)
+                .totalPages(totalPages)
+                .totalElements(totalElements)
+                .hasPrevious(hasPrevious)
+                .hasNext(hasNext)
+                .size(size)
+                .build();
     }
 }

@@ -1,8 +1,10 @@
 package org.demo.backend.post.application;
 
+import org.demo.backend.global.api.dto.PageResult;
 import org.demo.backend.post.application.dto.PostDetail;
 import org.demo.backend.post.controller.dto.PostCreateRequest;
 import org.demo.backend.post.controller.dto.PostUpdateRequest;
+import org.demo.backend.post.domain.SortType;
 
 public interface PostService {
 
@@ -15,9 +17,17 @@ public interface PostService {
     // 글 수정
     void update(Long memberId, Long postId, PostUpdateRequest request);
 
+    // 전체 글 목록
+    PageResult<PostDetail> findAllInfiniteScroll(
+            SortType sortType,
+            Long lastPostId,
+            Long lastValue,
+            int size,
+            String keyword
+    );
+
+    // 특정 회원의 글 목록
+    PageResult<PostDetail> findAllByMemberId(Long memberId, int page, int size);
+
     // 글 삭제
-
-    // 글 목록 → 정렬
-
-    // 글 검색
 }

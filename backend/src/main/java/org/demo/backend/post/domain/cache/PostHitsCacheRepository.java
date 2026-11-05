@@ -1,4 +1,4 @@
-package org.demo.backend.post.domain;
+package org.demo.backend.post.domain.cache;
 
 import java.util.Map;
 

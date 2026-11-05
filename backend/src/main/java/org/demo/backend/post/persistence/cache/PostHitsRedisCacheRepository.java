@@ -2,7 +2,8 @@ package org.demo.backend.post.persistence.cache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.demo.backend.post.domain.PostHitsCacheRepository;
+import org.demo.backend.post.domain.cache.PostHitsCacheKey;
+import org.demo.backend.post.domain.cache.PostHitsCacheRepository;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;

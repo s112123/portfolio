@@ -9,6 +9,7 @@ const PUBLIC_APIS = [
   { method: 'POST', url: '/v1/auth/login' },
   { method: 'POST', url: '/v1/auth/refresh' },
   { method: 'PATCH', url: '/v1/members/change-password' },
+  { method: 'GET', url: '/v1/posts' },
 ];
 
 const api = axios.create({

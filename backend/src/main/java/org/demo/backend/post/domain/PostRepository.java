@@ -1,5 +1,7 @@
 package org.demo.backend.post.domain;
 
+import org.demo.backend.global.api.dto.PageResult;
+
 import java.util.Optional;
 
 public interface PostRepository {
@@ -19,9 +21,17 @@ public interface PostRepository {
     // 좋아요 수 -1 감소
     int decrementPostLike(Long postId);
 
+    // 글 목록
+    PageResult<Post> fetchAllInfiniteScroll(
+            SortType sortType,
+            Long lastPostId,
+            Long lastValue,
+            int size,
+            String keyword
+    );
+
+    // 특정 회원의 글 목록
+    PageResult<Post> fetchPostsByDeferredJoinNative(Long memberId, int page, int size);
+
     // 글 삭제
-
-    // 글 목록 → 정렬
-
-    // 글 검색
 }

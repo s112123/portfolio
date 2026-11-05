@@ -3,11 +3,13 @@ package org.demo.backend.post.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.backend.global.api.dto.ApiResponse;
+import org.demo.backend.global.api.dto.PageResult;
 import org.demo.backend.like.application.PostLikeService;
 import org.demo.backend.post.application.PostService;
 import org.demo.backend.post.application.dto.PostDetail;
 import org.demo.backend.post.controller.dto.PostCreateRequest;
 import org.demo.backend.post.controller.dto.PostUpdateRequest;
+import org.demo.backend.post.domain.SortType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -68,13 +70,25 @@ public class PostController {
         return ResponseEntity.ok().body(ApiResponse.success());
     }
 
+    // 글 목록 (무한 스크롤)
+    @GetMapping
+    public ResponseEntity<ApiResponse<PageResult<PostDetail>>> readAllInfiniteScroll(
+            @RequestParam(value = "sortType") SortType sortType,
+            @RequestParam(value = "lastPostId", required = false) Long lastPostId,
+            @RequestParam(value = "lastValue", required = false) Long lastValue,
+            @RequestParam(value = "keyword", required = false) String keyword
+    ) {
+        PageResult<PostDetail> postDetails =
+                postService.findAllInfiniteScroll(sortType, lastPostId, lastValue, 8, keyword);
+        return ResponseEntity.ok().body(ApiResponse.success(postDetails));
+    }
 
-
-    // 글 삭제
-
-    // 글 목록 → 정렬
-
-    // 글 검색
+    // TODO: 글 삭제
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<ApiResponse<?>> deletePost(
+    ) {
+        return ResponseEntity.ok().body(ApiResponse.success());
+    }
 
     // IP 추출
     private String getClientIp(HttpServletRequest request) {

@@ -28,6 +28,8 @@ export default function Comment({ postId, currentUser }) {
   const [replyingToNickname, setReplyingToNickname] = useState(''); 
   const [replyContent, setReplyContent] = useState('');
 
+  // 입력창 포커스를 위한 useRef 선언
+  const commentInputRef = useRef(null);
   const replyInputRef = useRef(null);
 
   const getProfileImageUrl = (profileImageUrl) => {
@@ -63,7 +65,14 @@ export default function Comment({ postId, currentUser }) {
       alert('로그인 후 이용해주세요.');
       return;
     }
-    if (!commentContent.trim()) return;
+    
+    // 내용이 없을 때 입력창에 포커스 주기
+    if (!commentContent.trim()) {
+      if (commentInputRef.current) {
+        commentInputRef.current.focus();
+      }
+      return;
+    }
 
     try {
       const requestData = {
@@ -73,13 +82,19 @@ export default function Comment({ postId, currentUser }) {
         parentId: null
       };
 
-      await api.post('/v1/comments', requestData);
+      const response = await api.post('/v1/comments', requestData);
       setCommentContent('');
       
-      if (currentPage === 1) {
-        fetchComments(1);
+      // 💡 백엔드가 등록 후 갱신된 PageResult 데이터를 내려준다면 곧바로 마지막 페이지로 이동 가능합니다.
+      // 만약 응답으로 전체 데이터를 주지 않는다면 아래와 같이 계산하거나 재조회할 수 있습니다.
+      // 여기서는 최신 댓글이 마지막에 달리므로, 등록 후 전체 개수 기반 마지막 페이지로 이동합니다.
+      const updatedTotalElements = commentData.totalElements + 1;
+      const calculatedLastPage = Math.ceil(updatedTotalElements / commentData.size) || 1;
+
+      if (currentPage === calculatedLastPage) {
+        fetchComments(calculatedLastPage);
       } else {
-        setCurrentPage(1);
+        setCurrentPage(calculatedLastPage);
       }
     } catch (error) {
       console.error('댓글 등록 실패:', error);
@@ -93,7 +108,14 @@ export default function Comment({ postId, currentUser }) {
       alert('로그인 후 이용해주세요.');
       return;
     }
-    if (!replyContent.trim()) return;
+
+    // 답글 내용이 없을 때 답글 입력창에 포커스 주기
+    if (!replyContent.trim()) {
+      if (replyInputRef.current) {
+        replyInputRef.current.focus();
+      }
+      return;
+    }
 
     try {
       const requestData = {
@@ -109,6 +131,7 @@ export default function Comment({ postId, currentUser }) {
       setReplyingTo(null);
       setReplyingToNickname('');
       
+      // 답글 등록 시에도 최신 반영을 위해 마지막 페이지(또는 현재 페이지 유지)로 갱신
       fetchComments(currentPage);
     } catch (error) {
       console.error('답글 등록 실패:', error);
@@ -138,10 +161,10 @@ export default function Comment({ postId, currentUser }) {
       <form onSubmit={handleCommentSubmit} className="comment-form">
         <div className="comment-input-container">
           <textarea 
+            ref={commentInputRef} 
             placeholder={currentUser ? "댓글을 입력해주세요" : "로그인 후 댓글을 입력해주세요"}
             value={commentContent}
             onChange={(e) => setCommentContent(e.target.value)}
-            // 💡 1번 개선점: 메인 댓글 입력창을 클릭(포커스)하면 열려있던 답글창을 닫아줍니다.
             onFocus={() => {
               setReplyingTo(null);
               setReplyingToNickname('');
@@ -166,12 +189,9 @@ export default function Comment({ postId, currentUser }) {
           const isCommentWriter = currentUser && String(currentUser.memberId) === String(comment.writer?.id);
           const isReply = comment.parentId !== null && comment.parentId !== undefined;
 
-          // 💡 2번 문제 해결을 위한 팁: 
-          // 현재 페이지 목록에 부모가 없으면 comment.parentWriterNickname 같은 서버 응답 값을 쓰거나 '상대방'으로 표시해야 합니다.
           let parentWriterNickname = '';
           if (isReply) {
             const parentComment = commentData.content.find(c => c.id === comment.parentId);
-            // 만약 현재 페이지에 부모가 없다면 comment.parentWriterNickname (백엔드 추가 권장) 혹은 기본값 사용
             parentWriterNickname = parentComment ? parentComment.writer?.nickname : (comment.parentWriterNickname || '상대방');
           }
 
@@ -260,7 +280,7 @@ export default function Comment({ postId, currentUser }) {
 
                   <div className="reply-input-wrapper">
                     <textarea 
-                      ref={replyInputRef}
+                      ref={replyInputRef} 
                       placeholder="답글을 입력해주세요"
                       value={replyContent}
                       onChange={(e) => setReplyContent(e.target.value)}
@@ -293,7 +313,7 @@ export default function Comment({ postId, currentUser }) {
               onClick={() => setCurrentPage(startPage - 1)}
               className="btn-page"
             >
-              &lt;
+              <i className="fa-solid fa-angle-left"></i>
             </button>
           )}
 
@@ -317,7 +337,7 @@ export default function Comment({ postId, currentUser }) {
               onClick={() => setCurrentPage(endPage + 1)}
               className="btn-page"
             >
-              &gt;
+              <i className="fa-solid fa-angle-right"></i>
             </button>
           )}
         </div>

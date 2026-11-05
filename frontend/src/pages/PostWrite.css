@@ -127,7 +127,8 @@
 }
 
 .btn-cancel:hover {
-  background-color: #d1d5db;
+  background-color: rgb(210, 210, 210);
+  color: rgb(60, 60, 60);
 }
 
 .btn-cancel:disabled {

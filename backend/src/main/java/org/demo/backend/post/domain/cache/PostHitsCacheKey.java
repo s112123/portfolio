@@ -1,4 +1,4 @@
-package org.demo.backend.post.persistence.cache;
+package org.demo.backend.post.domain.cache;
 
 public abstract class PostHitsCacheKey {
 

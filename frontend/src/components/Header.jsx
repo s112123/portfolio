@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import './Header.css';
 
 const Header = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState(false);
@@ -12,12 +14,54 @@ const Header = () => {
   const [chatTab, setChatTab] = useState('friend-list-container');
   const [activeChatRoom, setActiveChatRoom] = useState(null);
 
+  // 검색어 상태 (URL 쿼리 파라미터에서 초기값 동기화)
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('keyword') || '');
+
+  const notificationRef = useRef(null);
+  const messageRef = useRef(null);
+
+  // URL의 keyword가 바뀔 때 입력창 상태 동기화
   useEffect(() => {
+    setSearchTerm(searchParams.get('keyword') || '');
+  }, [searchParams]);
+
+  // 로그인 상태 동기화 함수
+  const checkLoginStatus = () => {
     const token = localStorage.getItem('itBlogAccessToken');
     setIsLoggedIn(!!token);
+  };
+
+  useEffect(() => {
+    checkLoginStatus();
+
+    window.addEventListener('storage', checkLoginStatus);
+    window.addEventListener('authChange', checkLoginStatus);
+
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus);
+      window.removeEventListener('authChange', checkLoginStatus);
+    };
   }, []);
 
-  const handleLogout = async () => {
+  // 화면 외부 클릭 시 드롭다운 닫기 처리
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setIsNotificationOpen(false);
+      }
+      if (messageRef.current && !messageRef.current.contains(event.target)) {
+        setIsMessageOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
     try {
       await api.post('/v1/auth/logout');
     } catch (error) {
@@ -25,7 +69,19 @@ const Header = () => {
     } finally {
       localStorage.removeItem('itBlogAccessToken');
       setIsLoggedIn(false);
+      window.dispatchEvent(new Event('authChange'));
       navigate('/');
+    }
+  };
+
+  // 검색 실행 핸들러 (엔터 또는 검색 버튼 클릭)
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const trimmedKeyword = searchTerm.trim();
+    if (trimmedKeyword) {
+      navigate(`/?keyword=${encodeURIComponent(trimmedKeyword)}`);
+    } else {
+      navigate(`/`); // 검색어가 없으면 기본 메인으로
     }
   };
 
@@ -34,26 +90,42 @@ const Header = () => {
       <header className="header">
         <div className="container header-container">
           <div className="logo" id="logo">
-            <Link to="/" className="logo-link">It's blog</Link>
+            <Link to="/" 
+                  className="logo-link"
+                  onClick={(e) => {
+                    if (window.location.pathname === '/') {
+                      e.preventDefault();
+                      window.location.href = '/';
+                    }
+                  }}
+            >
+              It's blog
+            </Link>
           </div>
 
-          {/* 검색창 추가 */}
-          <div className="search-box">
-            <input type="text" id="search" placeholder="Search..." />
-            <button type="button" id="btn-search">
+          {/* 검색바 영역 */}
+          <form onSubmit={handleSearchSubmit} className="search-box">
+            <input 
+              type="text" 
+              id="search" 
+              placeholder="Search..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button type="submit" id="btn-search">
               <i className="fa-solid fa-magnifying-glass"></i>
             </button>
-          </div>
+          </form>
 
           <nav className="nav">
             <ul>
               {isLoggedIn ? (
                 <>
-                  {/* 알림 드롭다운 */}
-                  <li id="notification" className={isNotificationOpen ? 'active' : ''}>
+                  <li id="notification" className={isNotificationOpen ? 'active' : ''} ref={notificationRef}>
                     <a
-                      href="javascript:void(0);"
-                      onClick={() => {
+                      href="# "
+                      onClick={(e) => {
+                        e.preventDefault();
                         setIsNotificationOpen(!isNotificationOpen);
                         setIsMessageOpen(false);
                       }}
@@ -62,17 +134,17 @@ const Header = () => {
                     </a>
                     <div id="notification-module" className={`module ${isNotificationOpen ? 'active' : ''}`}>
                       <ul id="notification-list">
-                        <div className="notification-no-data">새로운 알림이 없습니다.</div>
+                        <div className="notification-no-data">새로운 알림이 없습니다</div>
                       </ul>
                       <button type="button" id="btn-notification-more">전체 알림</button>
                     </div>
                   </li>
 
-                  {/* 메시지 / 채팅 드롭다운 */}
-                  <li id="message" className={isMessageOpen ? 'active' : ''}>
+                  <li id="message" className={isMessageOpen ? 'active' : ''} ref={messageRef}>
                     <a
-                      href="javascript:void(0);"
-                      onClick={() => {
+                      href="# "
+                      onClick={(e) => {
+                        e.preventDefault();
                         setIsMessageOpen(!isMessageOpen);
                         setIsNotificationOpen(false);
                       }}
@@ -81,7 +153,7 @@ const Header = () => {
                     </a>
                     <div id="message-module" className={`module ${isMessageOpen ? 'active' : ''}`}>
                       <ul id="message-list">
-                        <div className="notification-message-no-data">새로운 메시지가 없습니다.</div>
+                        <div className="notification-message-no-data">새로운 메시지가 없습니다</div>
                       </ul>
                       <button
                         type="button"
@@ -96,23 +168,14 @@ const Header = () => {
                     </div>
                   </li>
 
-                  {/* 프로필 */}
                   <li id="profile">
                     <Link to="/profile">
                       <i className="fa-solid fa-user"></i>
                     </Link>
                   </li>
 
-                  {/* 관리자 */}
-                  {/* <li id="admin">
-                    <Link to="/admin">
-                      <i className="fa-solid fa-gear"></i>
-                    </Link>
-                  </li> */}
-
-                  {/* 로그아웃 아이콘 */}
                   <li>
-                    <a href="javascript:void(0);" id="logout" onClick={handleLogout}>
+                    <a href="# " id="logout" onClick={handleLogout}>
                       <i className="fa-solid fa-right-from-bracket"></i>
                     </a>
                   </li>
@@ -128,7 +191,7 @@ const Header = () => {
         </div>
       </header>
 
-      {/* 로그인 상태일 때 연동되는 채팅 모듈 창 */}
+      {/* 채팅 창 영역 */}
       {isLoggedIn && (
         <div id="chat-window" className={`draggable-module ${isChatOpen ? 'active' : ''}`}>
           <div id="chat-header">
@@ -164,12 +227,12 @@ const Header = () => {
               <div id="list-view">
                 <div id="friend-list-container" className={`tab-content ${chatTab === 'friend-list-container' ? 'active' : ''}`}>
                   <ul className="chat-user-list" id="chat-user-list">
-                    <div className="chat-user-list-no-data">등록된 친구가 없습니다.</div>
+                    <div className="chat-user-list-no-data">등록된 친구가 없습니다</div>
                   </ul>
                 </div>
                 <div id="chat-list-container" className={`tab-content ${chatTab === 'chat-list-container' ? 'active' : ''}`}>
                   <ul className="chat-user-list" id="chat-list">
-                    <div className="chat-list-no-data">대화 중인 내역이 없습니다.</div>
+                    <div className="chat-list-no-data">대화 중인 내역이 없습니다</div>
                   </ul>
                 </div>
               </div>

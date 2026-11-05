@@ -22,9 +22,11 @@ public class PostDetail {
     private Long likes;
     private boolean liked;
     private List<PostImageDetail> images;
+    private String thumbUrl;
     private LocalDateTime registeredAt;
 
-    public static PostDetail of(Post post, Long hits, boolean liked) {
+    // 글 조회용
+    public static PostDetail detailOf(Post post, Long hits, boolean liked) {
         PostDetail detail = new PostDetail();
         detail.id = post.getId();
         detail.writer = MemberDetail.of(post.getMember());
@@ -37,6 +39,34 @@ public class PostDetail {
                 .filter(image -> image.getStatus() == PostImageStatus.ATTACHED)
                 .map(PostImageDetail::of)
                 .collect(Collectors.toList());
+        detail.thumbUrl = post.getThumbUrl();
+        detail.registeredAt = post.getRegisteredAt();
+        return detail;
+    }
+
+    // 글 목록용 (메인 페이지)
+    public static PostDetail summaryOf(Post post) {
+        PostDetail detail = new PostDetail();
+        detail.id = post.getId();
+        detail.writer = MemberDetail.of(post.getMember());
+        detail.title = post.getTitle();
+        detail.content = post.getContent();
+        detail.hits = post.getHits();
+        detail.likes = post.getLikes();
+        detail.thumbUrl = post.getThumbUrl();
+        detail.registeredAt = post.getRegisteredAt();
+        return detail;
+    }
+
+    // 글 목록용 (내 정보)
+    public static PostDetail summaryOfMyPost(Post post) {
+        PostDetail detail = new PostDetail();
+        detail.id = post.getId();
+        detail.title = post.getTitle();
+        detail.content = post.getContent();
+        detail.hits = post.getHits();
+        detail.likes = post.getLikes();
+        detail.thumbUrl = post.getThumbUrl();
         detail.registeredAt = post.getRegisteredAt();
         return detail;
     }

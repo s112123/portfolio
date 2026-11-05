@@ -88,6 +88,10 @@
   cursor: pointer;
 }
 
+.sign-in-box #btn-sign-in:hover {
+  background-color: #1557b0; 
+}
+
 /* SIGN UP & FIND PASSWORD */
 .sign-in-box .sign-in-box-more-action {
   font-size: 13px;

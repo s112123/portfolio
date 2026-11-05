@@ -46,7 +46,8 @@ public class CommentController {
             @RequestParam(value = "postId") Long postId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page
     ) {
-        PageResult<CommentDetail> commentDetail = commentService.readAllByPostId(postId, (page < 1) ? 1 : page, 5);
-        return ResponseEntity.ok().body(ApiResponse.success(commentDetail));
+        PageResult<CommentDetail> commentDetails =
+                commentService.readAllByPostId(postId, (page < 1) ? 1 : page, 5);
+        return ResponseEntity.ok().body(ApiResponse.success(commentDetails));
     }
 }

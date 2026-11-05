@@ -1,0 +1,263 @@
+/* 기본 컨테이너 */
+.main-container {
+  width: 1200px;
+  min-height: 70vh;
+  margin: 0 auto;
+  padding: 0px 20px;
+  box-sizing: border-box;
+}
+
+/* TOP (정렬 탭 및 글쓰기 버튼) */
+.posts-top {
+  margin: 55px 0 30px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.posts-top ul {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+}
+
+.posts-top ul li.sort-item {
+  margin-right: 8px;
+  padding: 4px 0;
+  width: 75px;
+  border-radius: 5px;
+  background-color: rgb(230, 230, 230);
+  color: rgb(100, 100, 100);
+  font-size: 12px;
+  font-weight: 400;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.posts-top ul li.sort-item:hover {
+  background-color: rgb(210, 210, 210);
+  color: rgb(60, 60, 60);
+}
+
+.posts-top ul li.sort-item.active {
+  background-color: rgba(210, 40, 40, 0.3);
+  color: #000;
+  font-weight: 500;
+}
+
+/* [수정] 기존의 .posts-top #sort-all { display: none; } 구문을 삭제했습니다. */
+
+.posts-top #btn-add-post {
+  display: inline-block;
+  width: 80px;
+  padding: 4px 10px;
+  background-color: rgb(210, 40, 40);
+  border-radius: 5px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.posts-top #btn-add-post:hover {
+  background-color: rgb(185, 30, 30);
+}
+
+/* MIDDLE (게시글 영역) */
+.posts-middle {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  margin-bottom: 100px;
+}
+
+.posts-middle .no-data {
+  width: 100%;
+  height: 300px;
+  line-height: 300px;
+  border-top: 1px solid rgb(180, 180, 180);
+  border-bottom: 1px solid rgb(180, 180, 180);
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+}
+
+/* 카드 그리드 레이아웃 설정 (5열 배치) */
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 25px;
+}
+
+/* 개별 카드 아이템 박스 */
+.post-card {
+  background-color: #fff;
+  border: 1px solid rgb(220, 220, 220);
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: fadeIn 0.4s ease-in-out;
+  margin-bottom: 5px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.post-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.thumbnail-wrapper {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background-color: rgb(245, 245, 245);
+  /* border-bottom: 1px solid rgb(220, 220, 220) !important; */
+  display: block; /* 링크가 영역 전체를 차지하도록 설정 */
+  cursor: pointer; /* 마우스 올렸을 때 손가락 모양으로 변경 */
+}
+
+.thumbnail-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+.card-content {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.post-item-content-top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.post-item-content-profile {
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+  overflow: hidden;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.post-item-content-profile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-item-content-writer {
+  display: flex;
+  flex-direction: column;
+}
+
+.writer-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgb(50, 50, 50);
+  margin-bottom: 2px;
+}
+
+.post-created-at {
+  font-size: 11px;
+  font-weight: 400;
+  color: rgb(120, 120, 120);
+}
+
+.post-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.post-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgb(30, 30, 30);
+  margin: 5px 0 8px 0;
+  line-height: 1.4;
+  height: 1.4em; 
+  white-space: nowrap; 
+  overflow: hidden;
+  text-overflow: ellipsis; 
+}
+
+.post-item-title:hover {
+  text-decoration: underline;
+}
+
+.post-item-summary {
+  font-size: 12px;
+  color: rgb(90, 90, 90);
+  margin: 0 0 14px 0;
+  line-height: 1.4;
+  height: 2.8em; 
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+}
+
+.post-item-content-bottom {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid rgb(240, 240, 240);
+}
+
+.post-item-icon {
+  color: rgb(120, 120, 120);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.post-item-icon i {
+  font-size: 12px;
+  padding-right: 2px;
+}
+
+.post-item-icon span {
+  margin-right: 8px;
+}
+
+.loading-container {
+  min-height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  color: #888;
+}
