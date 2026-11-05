@@ -11,6 +11,7 @@ import org.demo.backend.post.controller.dto.PostCreateRequest;
 import org.demo.backend.post.controller.dto.PostUpdateRequest;
 import org.demo.backend.post.domain.*;
 import org.demo.backend.post.domain.cache.PostHitsCacheRepository;
+import org.demo.backend.post.domain.cache.PostListCacheRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ public class PostJpaService implements PostService {
     private final PostRepository postRepository;
     private final PostImageRepository postImageRepository;
     private final PostHitsCacheRepository postHitsCacheRepository;
+    private final PostListCacheRepository postListCacheRepository;
 
     @Override
     @Transactional
