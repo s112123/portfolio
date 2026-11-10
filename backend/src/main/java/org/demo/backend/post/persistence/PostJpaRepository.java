@@ -1,7 +1,6 @@
 package org.demo.backend.post.persistence;
 
 import org.demo.backend.post.domain.Post;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 public interface PostJpaRepository extends JpaRepository<Post, Long> {
@@ -33,7 +31,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "SET p.likes = p.likes + 1 " +
                     "WHERE p.id = :postId"
     )
-    int incrementPostLike(@Param("postId") Long postId);
+    int incrementLikeById(@Param("postId") Long postId);
 
     // 좋아요 수 -1 감소
     @Modifying(clearAutomatically = true, flushAutomatically = true)
@@ -42,7 +40,19 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "SET p.likes = p.likes - 1 " +
                     "WHERE p.id = :postId AND p.likes > 0"
     )
-    int decrementPostLike(@Param("postId") Long postId);
+    int decrementLikeById(@Param("postId") Long postId);
+
+
+    // 글 목록 (IN)
+    @Query(
+            value = "SELECT p " +
+                    "FROM Post p " +
+                    "JOIN FETCH p.member m " +
+                    "LEFT JOIN FETCH m.profileImage " +
+                    "WHERE p.id IN (:postIds) " +
+                    "ORDER BY p.id DESC"
+    )
+    List<Post> fetchByIdIn(@Param("postIds") List<Long> postIds);
 
     // 글 목록 (무한 스크롤) → 최신 순
     @Query(
@@ -56,7 +66,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "       OR p.content LIKE CONCAT('%', :keyword, '%')) " +
                     "ORDER BY p.id DESC"
     )
-    Slice<Post> fetchAllInfiniteScrollByLatest(
+    Slice<Post> fetchCursorByIdLessThanLatest(
             @Param("lastPostId") Long lastPostId,
             @Param("keyword") String keyword,
             Pageable pageable
@@ -80,7 +90,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "       OR p.content LIKE CONCAT('%', :keyword, '%')) " +
                     "ORDER BY p.likes DESC, p.id DESC"
     )
-    Slice<Post> fetchAllInfiniteScrollByLikes(
+    Slice<Post> fetchCursorByIdLessThanLikes(
             @Param("lastPostId") Long lastPostId,
             @Param("lastLikes") Long lastLikes,
             @Param("keyword") String keyword,
@@ -101,7 +111,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "       OR p.content LIKE CONCAT('%', :keyword, '%')) " +
                     "ORDER BY p.hits DESC, p.id DESC"
     )
-    Slice<Post> fetchAllInfiniteScrollByHits(
+    Slice<Post> fetchCursorByIdLessThanHits(
             @Param("lastPostId") Long lastPostId,
             @Param("lastHits") Long lastHits,
             @Param("keyword") String keyword,
@@ -122,7 +132,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "ON p.id = t.id",
             nativeQuery = true
     )
-    List<Post> findPostsByDeferredJoinNative(
+    List<Post> findPageByMemberId(
             @Param("memberId") Long memberId,
             @Param("offset") int offset,
             @Param("limit") int limit
@@ -133,5 +143,27 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
             value = "SELECT COUNT(*) FROM post WHERE member_id = :memberId",
             nativeQuery = true
     )
-    long countByMemberIdNative(@Param("memberId") Long memberId);
+    long countByMemberId(@Param("memberId") Long memberId);
+
+    // 특정 회원의 글 목록 (Cursor)
+    @Query(
+            value = "SELECT p " +
+                    "FROM Post p " +
+                    "WHERE p.member.id = :memberId " +
+                    "  AND (:lastPostId IS NULL OR p.id < :lastPostId) " +
+                    "ORDER BY p.id DESC"
+    )
+    Slice<Post> findCursorByIdLessThenAndMemberId(
+            @Param("memberId") Long memberId,
+            @Param("lastPostId") Long lastPostId,
+            Pageable pageable
+    );
+
+    // 글 삭제 (배치)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+            value = "DELETE FROM Post p " +
+                    "WHERE p.id IN (:ids)"
+    )
+    int deleteByIdIn(@Param("ids") List<Long> ids);
 }

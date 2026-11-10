@@ -1,3 +1,4 @@
+/* ----- LAYOUT ----- */
 .profile-wrapper {
   max-width: 800px;
   margin: 40px auto;
@@ -16,16 +17,15 @@
   margin: 50px 0 15px 0;
 }
 
-/* ================= 타이틀 크기 통일 ================= */
 .my-profile-section h2,
 .my-posts-section h3 {
-  font-size: 22px; /* 두 타이틀 모두 동일한 크기로 설정 */
+  font-size: 22px;
   font-weight: 700;
   color: #333;
   margin-bottom: 16px;
 }
 
-/* ================= 내 정보 섹션 스타일 ================= */
+/* ----- PROFILE ----- */
 .profile-card {
   background-color: #ffffff;
   border: 1px solid #e9ecef;
@@ -72,7 +72,7 @@
   font-weight: 500;
 }
 
-/* 버튼 영역 */
+/* ----- BUTTON ----- */
 .profile-actions {
   display: flex;
   justify-content: flex-end; 
@@ -82,7 +82,7 @@
   max-width: 800px;
 }
 
-/* 홈으로 버튼 스타일 */
+/* ----- HOME BUTTON ----- */
 .btn-home {
   background-color: #1a73e8;
   color: #ffffff; 
@@ -98,7 +98,7 @@
   background-color: #1557b0; 
 }
 
-/* 회원 탈퇴 버튼 스타일 */
+/* ----- WITHDRAW BUTTON ----- */
 .btn-withdraw {
   background-color: rgba(210, 40, 40, 0.06); 
   color: rgb(210, 40, 40);                   
@@ -124,7 +124,7 @@
   color: #888;
 }
 
-/* ================= 내가 쓴 글 목록 섹션 스타일 ================= */
+/* ----- MY POST LIST ----- */
 .posts-table-container {
   background-color: #ffffff;
   border: 1px solid #e9ecef;
@@ -160,7 +160,6 @@
   background-color: #fcfcfc;
 }
 
-/* 제목 열 스타일 */
 .posts-table .col-title {
   max-width: 350px;
 }
@@ -180,7 +179,6 @@
   text-decoration: underline;
 }
 
-/* 기타 컬럼 정렬 및 너비 */
 .posts-table .col-date {
   color: #555;
   width: 110px;
@@ -202,7 +200,7 @@
   white-space: nowrap;
 }
 
-/* 글 삭제 버튼 */
+/* ----- MY POST DELETE BUTTON ----- */
 .btn-post-delete {
   background-color: transparent;
   color: #d22828;
@@ -219,7 +217,6 @@
   color: #ffffff;
 }
 
-/* 데이터가 없을 때 스타일 */
 .posts-empty {
   text-align: center;
   padding: 40px 0;
@@ -227,7 +224,7 @@
   font-size: 15px;
 }
 
-/* ================= 페이지네이션 스타일 ================= */
+/* ----- PAGINATION ----- */
 .pagination {
   display: flex;
   justify-content: center;
@@ -249,31 +246,4 @@
   background-color: #007bff;
   color: #fff;
   border-color: #007bff;
-}
-
-/* 모바일 반응형 스타일 (화면 너비 768px 이하) */
-@media screen and (max-width: 768px) {
-  .profile-card {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 24px 20px;
-    gap: 24px;
-  }
-  
-  .profile-actions {
-    justify-content: center;
-  }
-
-  .posts-table th, 
-  .posts-table td {
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-  
-  .posts-table .col-date,
-  .posts-table .col-views,
-  .posts-table .col-likes {
-    display: none;
-  }
 }

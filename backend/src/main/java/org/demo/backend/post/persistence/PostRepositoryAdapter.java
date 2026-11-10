@@ -1,11 +1,11 @@
 package org.demo.backend.post.persistence;
 
 import lombok.RequiredArgsConstructor;
-import org.demo.backend.global.api.dto.PageResult;
+import org.demo.backend.global.web.dto.CursorDetail;
+import org.demo.backend.global.web.dto.PageDetail;
 import org.demo.backend.post.domain.Post;
 import org.demo.backend.post.domain.PostRepository;
 import org.demo.backend.post.domain.SortType;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -36,17 +36,22 @@ public class PostRepositoryAdapter implements PostRepository {
     }
 
     @Override
-    public int incrementPostLike(Long postId) {
-        return postJpaRepository.incrementPostLike(postId);
+    public int incrementLikeById(Long postId) {
+        return postJpaRepository.incrementLikeById(postId);
     }
 
     @Override
-    public int decrementPostLike(Long postId) {
-        return postJpaRepository.decrementPostLike(postId);
+    public int decrementLikeById(Long postId) {
+        return postJpaRepository.decrementLikeById(postId);
     }
 
     @Override
-    public PageResult<Post> fetchAllInfiniteScroll(
+    public List<Post> fetchByIdIn(List<Long> postIds) {
+        return postJpaRepository.fetchByIdIn(postIds);
+    }
+
+    @Override
+    public CursorDetail<Post> fetchCursorByIdLessThan(
             SortType sortType,
             Long lastPostId,
             Long lastValue,
@@ -57,30 +62,31 @@ public class PostRepositoryAdapter implements PostRepository {
         Slice<Post> posts;
 
         if (sortType == SortType.LIKES) {
-            posts = postJpaRepository.fetchAllInfiniteScrollByLikes(lastPostId, lastValue, keyword, pageable);
+            posts = postJpaRepository.fetchCursorByIdLessThanLikes(lastPostId, lastValue, keyword, pageable);
         } else if (sortType == SortType.HITS) {
-            posts = postJpaRepository.fetchAllInfiniteScrollByHits(lastPostId, lastValue, keyword, pageable);
+            posts = postJpaRepository.fetchCursorByIdLessThanHits(lastPostId, lastValue, keyword, pageable);
         } else {
-            posts = postJpaRepository.fetchAllInfiniteScrollByLatest(lastPostId, keyword, pageable);
+            posts = postJpaRepository.fetchCursorByIdLessThanLatest(lastPostId, keyword, pageable);
         }
 
-        return PageResult.<Post>builder()
+        return CursorDetail.<Post>builder()
                 .content(posts.getContent())
-                .hasPrevious(posts.hasPrevious())
                 .hasNext(posts.hasNext())
-                .currentPage(posts.getNumber() + 1)
-                .size(size)
                 .build();
     }
 
     @Override
-    public PageResult<Post> fetchPostsByDeferredJoinNative(Long memberId, int page, int size) {
+    public PageDetail<Post> fetchPageByMemberId(
+            Long memberId,
+            int page,
+            int size
+    ) {
         // 오프셋
         int offset = (page - 1) * size;
         // 전체 데이터
-        List<Post> content = postJpaRepository.findPostsByDeferredJoinNative(memberId, offset, size);
+        List<Post> content = postJpaRepository.findPageByMemberId(memberId, offset, size);
         // 전체 데이터 개수
-        long totalElements = postJpaRepository.countByMemberIdNative(memberId);
+        long totalElements = postJpaRepository.countByMemberId(memberId);
         // 전체 페이지 수
         int totalPages = (int) Math.ceil((double) totalElements / size);
         // 이전 버튼
@@ -88,7 +94,7 @@ public class PostRepositoryAdapter implements PostRepository {
         // 다음 버튼
         boolean hasNext = page < totalPages;
 
-        return PageResult.<Post>builder()
+        return PageDetail.<Post>builder()
                 .content(content)
                 .currentPage(page)
                 .totalPages(totalPages)
@@ -97,5 +103,29 @@ public class PostRepositoryAdapter implements PostRepository {
                 .hasNext(hasNext)
                 .size(size)
                 .build();
+    }
+
+    @Override
+    public CursorDetail<Post> findCursorByIdLessThenAndMemberId(
+            Long memberId,
+            Long lastPostId,
+            int size
+    ) {
+        Pageable pageable = PageRequest.of(0, size);
+        Slice<Post> slicePosts = postJpaRepository.findCursorByIdLessThenAndMemberId(memberId, lastPostId, pageable);
+        return CursorDetail.<Post>builder()
+                .content(slicePosts.getContent())
+                .hasNext(slicePosts.hasNext())
+                .build();
+    }
+
+    @Override
+    public void delete(Post post) {
+        postJpaRepository.delete(post);
+    }
+
+    @Override
+    public int deleteByIdIn(List<Long> ids) {
+        return postJpaRepository.deleteByIdIn(ids);
     }
 }

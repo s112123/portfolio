@@ -10,11 +10,11 @@ const Login = () => {
   const [passwordError, setPasswordError] = useState('');
   const [globalError, setGlobalError] = useState('');
   const [showWelcome, setShowWelcome] = useState(false);
-
   const navigate = useNavigate();
   const location = useLocation();
   const emailInputRef = useRef(null);
 
+  // URL 쿼리스트링으로 "new" 가 있는지 확인 → 신규가입 회원
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('new') !== null) {
@@ -47,7 +47,7 @@ const Login = () => {
     return true;
   };
 
-  // 로그인 처리
+  // 로그인
   const handleLogin = async (e) => {
     e.preventDefault();
     
@@ -78,8 +78,6 @@ const Login = () => {
       const messages = errorData?.message;
 
       let handled = false;
-
-      // 서버에서 message가 배열로 오는 경우 처리 (예: ["password:비밀번호는 4~8자리입니다"])
       if (Array.isArray(messages)) {
         messages.forEach((msgItem) => {
           if (typeof msgItem === 'string' && msgItem.includes(':')) {
@@ -96,9 +94,7 @@ const Login = () => {
             }
           }
         });
-      } 
-      // 문자열 형태이거나 단일 메시지인 경우 기존 로직 처리
-      else if (typeof messages === 'string' && messages.includes(':')) {
+      } else if (typeof messages === 'string' && messages.includes(':')) {
         const colonIndex = messages.indexOf(':');
         const field = messages.substring(0, colonIndex).trim().toLowerCase();
         const msg = messages.substring(colonIndex + 1).trim();

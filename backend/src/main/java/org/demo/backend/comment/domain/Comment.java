@@ -53,10 +53,7 @@ public class Comment extends BaseTimeEntity {
     )
     private Comment parent;
 
-    public static Comment of(
-            Member writer,
-            String content
-    ) {
+    public static Comment of(Member writer, String content) {
         Comment comment = new Comment();
         comment.writer = writer;
         comment.content = content;

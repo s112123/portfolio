@@ -2,8 +2,8 @@ package org.demo.backend.post.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.demo.backend.global.api.dto.ApiResponse;
-import org.demo.backend.global.api.dto.PageResult;
+import org.demo.backend.global.web.dto.ApiResponse;
+import org.demo.backend.global.web.dto.CursorDetail;
 import org.demo.backend.like.application.PostLikeService;
 import org.demo.backend.post.application.PostService;
 import org.demo.backend.post.application.dto.PostDetail;
@@ -33,7 +33,7 @@ public class PostController {
             @AuthenticationPrincipal Long memberId,
             @Valid @RequestBody PostCreateRequest request
     ) {
-        Long savedPostId = postService.create(memberId, request);
+        Long savedPostId = postService.save(memberId, request);
         URI location = URI.create(String.format("/api/v1/posts/%d", savedPostId));
         return ResponseEntity.created(location).body(ApiResponse.success(savedPostId));
     }
@@ -55,7 +55,7 @@ public class PostController {
         }
 
         // 3. 글 조회 및 조회 수 캐시
-        PostDetail postDetail = postService.readByIdWithHitsCache(postId, viewer, liked);
+        PostDetail postDetail = postService.fetchByIdAndIncrementHitsCache(postId, viewer, liked);
         return ResponseEntity.ok().body(ApiResponse.success(postDetail));
     }
 
@@ -72,21 +72,24 @@ public class PostController {
 
     // 글 목록 (무한 스크롤)
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResult<PostDetail>>> readAllInfiniteScroll(
+    public ResponseEntity<ApiResponse<CursorDetail<PostDetail>>> readAllInfiniteScroll(
             @RequestParam(value = "sortType") SortType sortType,
             @RequestParam(value = "lastPostId", required = false) Long lastPostId,
             @RequestParam(value = "lastValue", required = false) Long lastValue,
             @RequestParam(value = "keyword", required = false) String keyword
     ) {
-        PageResult<PostDetail> postDetails =
-                postService.findAllInfiniteScroll(sortType, lastPostId, lastValue, 8, keyword);
+        CursorDetail<PostDetail> postDetails =
+                postService.fetchCursorById(sortType, lastPostId, lastValue, 10, keyword);
         return ResponseEntity.ok().body(ApiResponse.success(postDetails));
     }
 
-    // TODO: 글 삭제
+    // 글 삭제
     @DeleteMapping("/{postId}")
-    public ResponseEntity<ApiResponse<?>> deletePost(
+    public ResponseEntity<ApiResponse<Void>> deletePost(
+            @PathVariable("postId") Long postId,
+            @AuthenticationPrincipal Long memberId
     ) {
+        postService.deleteById(postId, memberId);
         return ResponseEntity.ok().body(ApiResponse.success());
     }
 

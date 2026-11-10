@@ -1,6 +1,10 @@
-package org.demo.backend.otp.persistence.cache;
+package org.demo.backend.otp.domain.cache;
 
-public abstract class OtpCacheKey {
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class OtpCacheKey {
 
     // OTP 코드를 저장하는 키
     private static final String OTP_PREFIX = "otp:";

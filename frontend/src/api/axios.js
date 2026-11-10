@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+
 // 인증이 불필요한 퍼블릭 API 목록 (HTTP Method와 URL 매칭 규칙 명시)
 const PUBLIC_APIS = [
   { method: 'GET', url: '/v1/health' },
@@ -13,7 +15,7 @@ const PUBLIC_APIS = [
 ];
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: `${baseUrl}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -27,11 +29,16 @@ api.interceptors.request.use(
     const requestUrl = config.url || '';
 
     // 요청 메서드와 URL이 퍼블릭 API 규칙에 정확히 부합하는지 확인
-    const isPublic = PUBLIC_APIS.some(
-      (apiRule) => 
-        apiRule.method.toUpperCase() === requestMethod && 
-        requestUrl.includes(apiRule.url)
-    );
+    const isPublic = PUBLIC_APIS.some((apiRule) =>  {
+      if (apiRule.method.toUpperCase() !== requestMethod) return false;
+
+      // /v1/posts 처럼 정확히 일치하는 경우만 퍼블릭으로 인정
+      if (apiRule.url === '/v1/posts') {
+        return requestUrl === '/v1/posts' || requestUrl === '/v1/posts/';
+      }
+
+      return requestUrl.includes(apiRule.url);
+    });
 
     if (!isPublic) {
       const token = localStorage.getItem('itBlogAccessToken');
@@ -39,7 +46,7 @@ api.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`;
       }
     } else {
-      // 퍼블릭 경로인 경우 혹시 남아있을 수 있는 Authorization 헤더를 명시적으로 제거
+      // 퍼블릭 경로인 경우 헤더 제거
       delete config.headers.Authorization;
     }
     return config;

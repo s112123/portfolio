@@ -2,8 +2,8 @@ package org.demo.backend.member.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.demo.backend.global.api.dto.ApiResponse;
-import org.demo.backend.global.api.dto.PageResult;
+import org.demo.backend.global.web.dto.ApiResponse;
+import org.demo.backend.global.web.dto.PageDetail;
 import org.demo.backend.member.application.MemberService;
 import org.demo.backend.member.application.dto.MemberDetail;
 import org.demo.backend.member.controller.dto.MemberCreateRequest;
@@ -31,7 +31,7 @@ public class MemberController {
     public ResponseEntity<ApiResponse<MemberDetail>> create(
             @Valid @RequestBody MemberCreateRequest request
     ) {
-        MemberDetail memberDetail = memberService.create(request);
+        MemberDetail memberDetail = memberService.save(request);
         URI location = URI.create(String.format("/api/v1/members/%d", memberDetail.getId()));
         return ResponseEntity.created(location).body(ApiResponse.success(memberDetail));
     }
@@ -41,7 +41,7 @@ public class MemberController {
     public ResponseEntity<ApiResponse<MemberDetail>> readById(
             @PathVariable("memberId") Long memberId
     ) {
-        MemberDetail memberDetail = memberService.readById(memberId);
+        MemberDetail memberDetail = memberService.findById(memberId);
         return ResponseEntity.ok().body(ApiResponse.success(memberDetail));
     }
 
@@ -50,17 +50,17 @@ public class MemberController {
     public ResponseEntity<ApiResponse<MemberDetail>> readMe(
             @AuthenticationPrincipal Long myId
     ) {
-        MemberDetail memberDetail = memberService.readById(myId);
+        MemberDetail memberDetail = memberService.findById(myId);
         return ResponseEntity.ok().body(ApiResponse.success(memberDetail));
     }
 
     // 내가 쓴 글 목록
     @GetMapping("/posts")
-    public ResponseEntity<ApiResponse<PageResult<PostDetail>>> readMyPosts(
+    public ResponseEntity<ApiResponse<PageDetail<PostDetail>>> readMyPosts(
             @AuthenticationPrincipal Long memberId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page
     ) {
-        PageResult<PostDetail> postDetail = postService.findAllByMemberId(memberId, page < 1 ? 1 : page, 5);
+        PageDetail<PostDetail> postDetail = postService.fetchPageByMemberId(memberId, page < 1 ? 1 : page, 5);
         return ResponseEntity.ok().body(ApiResponse.success(postDetail));
     }
 

@@ -8,7 +8,7 @@ import org.demo.backend.auth.controller.dto.LoginRequest;
 import org.demo.backend.global.exception.BusinessException;
 import org.demo.backend.global.jwt.application.JwtCacheService;
 import org.demo.backend.global.jwt.domain.JwtType;
-import org.demo.backend.global.jwt.persistence.cache.JwtCacheKey;
+import org.demo.backend.global.jwt.domain.cache.JwtCacheKey;
 import org.demo.backend.global.jwt.provider.JwtProvider;
 import org.demo.backend.global.lock.distributed.DistributedLockService;
 import org.demo.backend.global.security.CustomUserDetails;

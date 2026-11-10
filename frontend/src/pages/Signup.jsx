@@ -29,7 +29,7 @@ const Signup = () => {
   const [timeLeft, setTimeLeft] = useState(180);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
-  // 타이머 작동 로직
+  // 타이머 작동
   useEffect(() => {
     let timer;
     if (isTimerRunning && timeLeft > 0) {
@@ -43,14 +43,14 @@ const Signup = () => {
     return () => clearInterval(timer);
   }, [isTimerRunning, timeLeft]);
 
-  // 초를 MM:SS 형식으로 변환하는 함수 (예: 179 -> "02:59")
+  // 시간 포맷 함수 (예: 179 -> "02:59")
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-  // 서버 에러 메시지 파싱 함수 ("필드명:메시지" 형태에서 필드명을 제거하고 메시지만 추출)
+  // 서버 에러 메세지 파싱 함수 ("필드명:메시지" 형태에서 필드명을 제거하고 메시지만 추출)
   const parseErrorMessage = (msg) => {
     if (!msg) return '';
     if (typeof msg !== 'string') {
@@ -63,7 +63,7 @@ const Signup = () => {
     return msg;
   };
 
-  // 입력값 변경 핸들러
+  // 입력값 변경
   const handleChange = (e) => {
     const { id, value } = e.target;
     setForm((prev) => ({ ...prev, [id]: value }));
@@ -245,7 +245,7 @@ const Signup = () => {
       <div className="sign-up-box">
         <h2>회원가입</h2>
         <form onSubmit={handleSignup}>
-          {/* 이메일 및 인증 섹션 */}
+          {/* 이메일 및 인증 */}
           <div className="sign-up-item">
             <label htmlFor="email">이메일을 입력하세요</label>
             <div className="sign-up-email-box">
@@ -264,8 +264,7 @@ const Signup = () => {
                 </button>
               </div>
             </div>
-
-            {/* 인증코드 입력 박스 */}
+            {/* 인증코드 입력 */}
             {uiState.showConfirmBox && (
               <div className="sign-up-confirm-box" id="confirm-code-box" style={{ marginTop: '10px' }}>
                 <div className="sign-up-confirm">
@@ -284,22 +283,18 @@ const Signup = () => {
                 </div>
               </div>
             )}
-
-            {/* 타이머가 작동 중(isTimerRunning)일 때만 녹색 메시지 창 노출 */}
+            {/* 타이머가 작동 중일 때만 녹색 메시지 창 노출 */}
             {uiState.sendMessage && isTimerRunning && (
               <small id="send-message" style={{ display: 'block' }}>
                 {uiState.sendMessage} ({formatTime(timeLeft)})
               </small>
             )}
-
             {/* 에러 메시지 */}
             {errors.email && <small className="error" style={{ display: 'block' }}>{errors.email}</small>}
             {errors.confirmCode && <small className="error" style={{ display: 'block' }}>{errors.confirmCode}</small>}
-
             {uiState.confirmCodeMessage && <small id="confirm-code-message" style={{ display: 'block', color: 'green' }}>{uiState.confirmCodeMessage}</small>}
           </div>
-
-          {/* 비밀번호 섹션 */}
+          {/* 비밀번호 */}
           <div className="sign-up-item">
             <label htmlFor="password">비밀번호를 입력하세요</label>
             <input
@@ -311,8 +306,7 @@ const Signup = () => {
             />
             {errors.password && <small className="error" style={{ display: 'block' }}>{errors.password}</small>}
           </div>
-
-          {/* 비밀번호 확인 섹션 */}
+          {/* 비밀번호 확인 */}
           <div className="sign-up-item">
             <label htmlFor="rePassword">비밀번호를 확인하세요</label>
             <input

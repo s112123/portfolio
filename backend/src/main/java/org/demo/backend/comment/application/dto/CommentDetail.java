@@ -19,6 +19,7 @@ public class CommentDetail {
     private boolean postAuthor;
     private Long parentId;
     private String parentWriterNickname;
+    private int replyCount;
 
     public static CommentDetail of(Comment comment) {
         CommentDetail detail = new CommentDetail();
@@ -45,6 +46,7 @@ public class CommentDetail {
         detail.postAuthor = projection.getWriterId().equals(projection.getPostWriterId());
         detail.parentId = projection.getParentId();
         detail.parentWriterNickname = projection.getParentWriterNickname();
+        detail.replyCount = projection.getReplyCount();
         return detail;
     }
 }

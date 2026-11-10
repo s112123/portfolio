@@ -29,7 +29,7 @@ public class PostHitsScheduler {
     )
     public void flushPostHitsToRdb() {
         // 1. 조회수 증분 캐시 조회
-        Map<Long, Long> postHitsDelta = postHitsCacheRepository.getAllHitsDeltaAndClear();
+        Map<Long, Long> postHitsDelta = postHitsCacheRepository.findHitsDeltaAndClear();
         if (postHitsDelta.isEmpty()) {
             return;
         }
@@ -64,7 +64,7 @@ public class PostHitsScheduler {
             }
         }
 
-        log.info(
+        log.debug(
                 "게시글 조회수 DB 반영 완료. 전체: {}, 성공: {}, 실패: {}",
                 postHitsDelta.size(),
                 successCount,

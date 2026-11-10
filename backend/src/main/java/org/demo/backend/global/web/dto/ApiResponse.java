@@ -1,4 +1,4 @@
-package org.demo.backend.global.api.dto;
+package org.demo.backend.global.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;

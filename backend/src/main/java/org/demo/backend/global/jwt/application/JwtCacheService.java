@@ -3,9 +3,9 @@ package org.demo.backend.global.jwt.application;
 import lombok.RequiredArgsConstructor;
 import org.demo.backend.global.exception.BusinessException;
 import org.demo.backend.global.jwt.application.dto.JwtDetail;
-import org.demo.backend.global.jwt.domain.JwtCacheRepository;
 import org.demo.backend.global.jwt.domain.JwtErrorCode;
 import org.demo.backend.global.jwt.domain.JwtType;
+import org.demo.backend.global.jwt.domain.cache.JwtCacheRepository;
 import org.demo.backend.global.jwt.provider.JwtProvider;
 import org.springframework.stereotype.Service;
 

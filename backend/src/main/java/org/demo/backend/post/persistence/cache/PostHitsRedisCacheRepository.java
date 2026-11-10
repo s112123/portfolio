@@ -65,7 +65,7 @@ public class PostHitsRedisCacheRepository implements PostHitsCacheRepository {
     // 또는 HASH 를 일정 크기로 나누어 처리하거나 HSCAN 조회 등 청크 방식을 고려한다
     // 그런데 HSCAN 방식도 1번 청크를 읽고 2번 청크를 읽는 틈에 조회 수 증분값이 또 쌓일 수 있어 구현이 복잡하다
     @Override
-    public Map<Long, Long> getAllHitsDeltaAndClear() {
+    public Map<Long, Long> findHitsDeltaAndClear() {
         String key = PostHitsCacheKey.generatePostHitsKey();
 
         // Lua Script
@@ -111,6 +111,18 @@ public class PostHitsRedisCacheRepository implements PostHitsCacheRepository {
             Long delta = entry.getValue();
             redisTemplate.opsForHash().increment(key, field, delta);
         }
+    }
+
+    @Override
+    public void deleteHits(Long postId) {
+        String key = PostHitsCacheKey.generatePostHitsKey();
+        redisTemplate.opsForHash().delete(key, String.valueOf(postId));
+    }
+
+    @Override
+    public void deleteViewer(Long postId) {
+        String key = PostHitsCacheKey.generatePostViewerKey(postId);
+        redisTemplate.delete(key);
     }
 
     private <T> DefaultRedisScript<T> getRedisScript(String script, Class<T> resultType) {

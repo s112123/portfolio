@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.demo.backend.comment.application.CommentService;
 import org.demo.backend.comment.application.dto.CommentDetail;
 import org.demo.backend.comment.controller.dto.CommentCreateRequest;
-import org.demo.backend.global.api.dto.ApiResponse;
-import org.demo.backend.global.api.dto.PageResult;
+import org.demo.backend.global.web.dto.ApiResponse;
+import org.demo.backend.global.web.dto.PageDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +26,7 @@ public class CommentController {
     public ResponseEntity<ApiResponse<CommentDetail>> registerComment(
             @Valid @RequestBody CommentCreateRequest request
     ) {
-        CommentDetail commentDetail = commentService.create(request);
+        CommentDetail commentDetail = commentService.save(request);
         URI location = URI.create(String.format("/api/v1/comments/%d", commentDetail.getId()));
         return ResponseEntity.created(location).body(ApiResponse.success(commentDetail));
     }
@@ -42,12 +42,12 @@ public class CommentController {
 
     // 댓글 목록
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResult<CommentDetail>>> readAllByPostId(
+    public ResponseEntity<ApiResponse<PageDetail<CommentDetail>>> readAllByPostId(
             @RequestParam(value = "postId") Long postId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page
     ) {
-        PageResult<CommentDetail> commentDetails =
-                commentService.readAllByPostId(postId, (page < 1) ? 1 : page, 5);
+        PageDetail<CommentDetail> commentDetails =
+                commentService.fetchByPostId(postId, (page < 1) ? 1 : page, 5);
         return ResponseEntity.ok().body(ApiResponse.success(commentDetails));
     }
 }

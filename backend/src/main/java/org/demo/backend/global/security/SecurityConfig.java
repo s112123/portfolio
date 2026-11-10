@@ -22,6 +22,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
+import static org.demo.backend.member.domain.MemberRole.ADMIN;
+import static org.demo.backend.member.domain.MemberRole.ROOT;
+
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -51,6 +54,7 @@ public class SecurityConfig {
                         .antMatchers(HttpMethod.GET, "/api/v1/post-images/**").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/v1/comments").permitAll()
+                        .antMatchers(HttpMethod.GET, "/actuator/**").hasAnyRole(ROOT.name(), ADMIN.name())
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
                 .build();

@@ -2,9 +2,9 @@ package org.demo.backend.otp.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.demo.backend.global.api.dto.ApiResponse;
 import org.demo.backend.global.exception.BusinessException;
 import org.demo.backend.global.sender.MessageSender;
+import org.demo.backend.global.web.dto.ApiResponse;
 import org.demo.backend.member.domain.MemberErrorCode;
 import org.demo.backend.member.domain.MemberRepository;
 import org.demo.backend.otp.application.OtpService;
