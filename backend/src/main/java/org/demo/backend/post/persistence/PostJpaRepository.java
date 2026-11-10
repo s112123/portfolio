@@ -64,6 +64,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "  AND (:keyword IS NULL OR :keyword = '' " +
                     "       OR p.title LIKE CONCAT('%', :keyword, '%')" +
                     "       OR p.content LIKE CONCAT('%', :keyword, '%')) " +
+                    "  AND m.status = 'ACTIVE' " +
                     "ORDER BY p.id DESC"
     )
     Slice<Post> fetchCursorByIdLessThanLatest(
@@ -88,6 +89,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "  AND (:keyword IS NULL OR :keyword = '' " +
                     "       OR p.title LIKE CONCAT('%', :keyword, '%') " +
                     "       OR p.content LIKE CONCAT('%', :keyword, '%')) " +
+                    "  AND m.status = 'ACTIVE' " +
                     "ORDER BY p.likes DESC, p.id DESC"
     )
     Slice<Post> fetchCursorByIdLessThanLikes(
@@ -109,6 +111,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "  AND (:keyword IS NULL OR :keyword = '' " +
                     "       OR p.title LIKE CONCAT('%', :keyword, '%') " +
                     "       OR p.content LIKE CONCAT('%', :keyword, '%')) " +
+                    "  AND m.status = 'ACTIVE' " +
                     "ORDER BY p.hits DESC, p.id DESC"
     )
     Slice<Post> fetchCursorByIdLessThanHits(

@@ -48,7 +48,7 @@ public class PostLikeDeleteWorker {
                     );
                     // 실패한 시점에는 워커 작업을 중단한다
                     // 만약, 스케쥴러에서 실패한 작업을 재시도할 때 중복 처리로 꼬일 수 있기 때문이다
-                    throw new WithdrawalTaskException(WithdrawalTaskType.POST_DELETE, memberId, e);
+                    throw new WithdrawalTaskException(WithdrawalTaskType.POST_LIKE_DELETE, memberId, e);
                 }
             }
 
