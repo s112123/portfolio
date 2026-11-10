@@ -153,7 +153,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "  AND (:lastPostId IS NULL OR p.id < :lastPostId) " +
                     "ORDER BY p.id DESC"
     )
-    Slice<Post> findCursorByIdLessThenAndMemberId(
+    Slice<Post> findCursorByMemberIdAndIdLessThan(
             @Param("memberId") Long memberId,
             @Param("lastPostId") Long lastPostId,
             Pageable pageable

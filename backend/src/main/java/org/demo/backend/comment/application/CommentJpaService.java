@@ -68,6 +68,14 @@ public class CommentJpaService implements CommentService {
 
     @Override
     @Transactional
+    public void deleteByIdIn(List<Long> commentIds) {
+        if (commentIds == null || commentIds.isEmpty()) return;
+        // 4. 글 정보 삭제
+        commentRepository.deleteByIdIn(commentIds);
+    }
+
+    @Override
+    @Transactional
     public int deleteByPostIdIn(List<Long> postIds) {
         return commentRepository.deleteByPostIdIn(postIds);
     }

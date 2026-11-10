@@ -3,10 +3,13 @@ package org.demo.backend.comment.persistence;
 import lombok.RequiredArgsConstructor;
 import org.demo.backend.comment.domain.Comment;
 import org.demo.backend.comment.domain.CommentRepository;
+import org.demo.backend.global.web.dto.CursorDetail;
 import org.demo.backend.global.web.dto.PageDetail;
+import org.demo.backend.post.domain.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -51,5 +54,21 @@ public class CommentRepositoryAdapter implements CommentRepository {
     @Override
     public int deleteByPostIdIn(List<Long> postIds) {
         return commentJpaRepository.deleteByPostIdIn(postIds);
+    }
+
+    @Override
+    public int deleteByIdIn(List<Long> ids) {
+        return commentJpaRepository.deleteByIdIn(ids);
+    }
+
+    @Override
+    public CursorDetail<Comment> findCursorByMemberIdAndIdLessThan(Long memberId, Long lastCommentId, int size) {
+        Pageable pageable = PageRequest.of(0, size);
+        Slice<Comment> sliceComments =
+                commentJpaRepository.findCursorByMemberIdAndIdLessThan(memberId, lastCommentId, pageable);
+        return CursorDetail.<Comment>builder()
+                .content(sliceComments.getContent())
+                .hasNext(sliceComments.hasNext())
+                .build();
     }
 }

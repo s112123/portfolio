@@ -6,7 +6,7 @@ import org.demo.backend.member.application.dto.MemberDetail;
 import org.demo.backend.member.controller.dto.MemberCreateRequest;
 import org.demo.backend.member.controller.dto.PasswordChangeRequest;
 import org.demo.backend.member.domain.*;
-import org.demo.backend.member.event.MemberDeleteEvent;
+import org.demo.backend.member.withdrawal.event.MemberDeleteEvent;
 import org.demo.backend.otp.application.OtpService;
 import org.demo.backend.otp.domain.OtpErrorCode;
 import org.springframework.context.ApplicationEventPublisher;

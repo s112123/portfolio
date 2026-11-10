@@ -17,6 +17,9 @@ public interface CommentService {
     // 댓글 삭제
     void deleteById(Long commentId);
 
+    // 댓글 삭제 (배치)
+    void deleteByIdIn(List<Long> commentIds);
+
     // 특정 게시물의 모든 댓글 삭제
     int deleteByPostIdIn(List<Long> postIds);
 }

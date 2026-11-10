@@ -1,9 +1,11 @@
-package org.demo.backend.member.application.worker;
+package org.demo.backend.member.withdrawal.worker;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.backend.like.application.PostLikeService;
 import org.demo.backend.like.domain.PostLike;
+import org.demo.backend.member.domain.WithdrawalTaskException;
+import org.demo.backend.member.domain.WithdrawalTaskType;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -40,11 +42,13 @@ public class PostLikeDeleteWorker {
                     // 지금처럼 로그만 남기고 스킵할 것이 아니라 실패 상태를 DB 에 기록하고 스케쥴러가 재시도하도록 해야 한다
                     // 미리 회원 상태를 넣어 회원 삭제 시도 시, "삭제 중" 으로 처리해 둠
                     log.error(
-                            "[회원 탈퇴] 게시글 삭제 실패: 회원 ID={}, 마지막으로 삭제 성공한 게시물 ID={}",
+                            "[회원 탈퇴] 좋아요 삭제 실패: 회원 ID={}, 삭제를 실패한 게시글 ID={}",
                             memberId,
                             postId
                     );
-                    // return;
+                    // 실패한 시점에는 워커 작업을 중단한다
+                    // 만약, 스케쥴러에서 실패한 작업을 재시도할 때 중복 처리로 꼬일 수 있기 때문이다
+                    throw new WithdrawalTaskException(WithdrawalTaskType.POST_DELETE, memberId, e);
                 }
             }
 

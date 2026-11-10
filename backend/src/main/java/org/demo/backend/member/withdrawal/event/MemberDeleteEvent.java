@@ -1,4 +1,4 @@
-package org.demo.backend.member.event;
+package org.demo.backend.member.withdrawal.event;
 
 import lombok.Getter;
 import org.demo.backend.member.domain.Member;

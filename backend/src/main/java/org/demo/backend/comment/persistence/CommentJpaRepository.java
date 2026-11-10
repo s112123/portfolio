@@ -1,8 +1,10 @@
 package org.demo.backend.comment.persistence;
 
 import org.demo.backend.comment.domain.Comment;
+import org.demo.backend.post.domain.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -83,5 +85,27 @@ public interface CommentJpaRepository extends JpaRepository<Comment, Long> {
     )
     int deleteByMemberId(
             @Param("memberId") Long memberId
+    );
+
+    // 글 삭제 (배치)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+            value = "DELETE FROM Comment c " +
+                    "WHERE c.id IN (:ids)"
+    )
+    int deleteByIdIn(@Param("ids") List<Long> ids);
+
+    // 특정 회원의 댓글 목록 (Cursor)
+    @Query(
+            value = "SELECT c " +
+                    "FROM Comment c " +
+                    "WHERE c.writer.id = :memberId " +
+                    "  AND (:lastCommentId IS NULL OR c.id < :lastCommentId) " +
+                    "ORDER BY c.id DESC"
+    )
+    Slice<Comment> findCursorByMemberIdAndIdLessThan(
+            @Param("memberId") Long memberId,
+            @Param("lastCommentId") Long lastCommentId,
+            Pageable pageable
     );
 }
