@@ -4,5 +4,6 @@ public enum WithdrawalTaskType {
 
     POST_DELETE,
     POST_LIKE_DELETE,
-    COMMENT_DELETE
+    COMMENT_DELETE,
+    MEMBER_DELETE,
 }

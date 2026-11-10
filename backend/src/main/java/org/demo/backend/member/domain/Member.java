@@ -34,6 +34,10 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private MemberRole role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MemberStatus status;
+
     @Column(nullable = false)
     private LocalDateTime registeredAt;
 
@@ -53,6 +57,7 @@ public class Member extends BaseTimeEntity {
         member.nickname = nickname;
         member.profileImageUrl = profileImageUrl;
         member.role = MemberRole.USER;
+        member.status = MemberStatus.ACTIVE;
         member.registeredAt = registeredAt;
         return member;
     }
@@ -65,5 +70,10 @@ public class Member extends BaseTimeEntity {
     // 권한 변경
     public void updateRole(MemberRole role) {
         this.role = role;
+    }
+
+    // 상태 변경
+    public void inactive() {
+        this.status = MemberStatus.INACTIVE;
     }
 }

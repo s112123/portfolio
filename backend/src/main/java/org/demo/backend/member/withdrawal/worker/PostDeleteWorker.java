@@ -41,6 +41,14 @@ public class PostDeleteWorker {
                 List<Long> deletedPostIds = posts.stream()
                         .map(post -> post.getId())
                         .collect(Collectors.toList());
+
+                // 예외 테스트
+//                if (deletedPostIds.contains(250L)) {
+//                    throw new RuntimeException();
+//                }
+
+
+
                 postService.deleteByIdIn(deletedPostIds);
             } catch (Exception e) {
                 // 지금처럼 로그만 남기고 스킵할 것이 아니라 실패 상태를 DB 에 기록하고 스케쥴러가 재시도하도록 해야 한다

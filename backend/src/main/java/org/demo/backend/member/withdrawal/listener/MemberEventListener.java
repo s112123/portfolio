@@ -40,8 +40,13 @@ public class MemberEventListener {
             postLikeDeleteWorker.process(memberId);
             // 3. 타 게시물의 댓글 삭제
             commentDeleteWorker.process(memberId);
+
             // 4. 회원 삭제
-            memberRepository.deleteById(memberId);
+            try {
+                memberRepository.deleteById(memberId);
+            } catch (Exception e) {
+                throw new WithdrawalTaskException(WithdrawalTaskType.MEMBER_DELETE, memberId, e);
+            }
         } catch (WithdrawalTaskException we) {
             // 실패 시, 실패 로그를 DB 에 저장
             try {
