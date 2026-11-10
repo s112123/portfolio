@@ -65,6 +65,15 @@ file-upload:
       path: classpath:/static/images/post/default.png
     storage: D:/upload/post/
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,metrics,info"
+  endpoint:
+    health:
+      show-details: always
+
 ---
 app:
   host: http://localhost:8080
@@ -102,6 +111,15 @@ file-upload:
       path: classpath:/static/images/post/
       file: default.png
     storage: D:/upload/post/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,metrics,info"
+  endpoint:
+    health:
+      show-details: always
 
 ---
 app:

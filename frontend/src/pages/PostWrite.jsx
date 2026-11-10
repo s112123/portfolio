@@ -13,22 +13,19 @@ import './PostWrite.css';
 export default function PostWrite() {
   const [title, setTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // 유효성 검사 에러 메시지 상태 관리
   const [titleError, setTitleError] = useState('');
   const [contentError, setContentError] = useState('');
-
   const titleRef = useRef(null);
   const editorRef = useRef();
   const navigate = useNavigate();
 
+  // 페이지 접속 시, 제목에 포커스
   useEffect(() => {
-    // 페이지 접속 시, 제목에 자동 포커스
     titleRef.current?.focus();
   }, []);
 
+  // 제목에서 탭을 누르면 에디터로 이동
   const handleTitleKeyDown = (e) => {
-    // 제목에서 탭을 누르면 에디터로 이동
     if (e.key === 'Tab' && !e.shiftKey) {
       e.preventDefault();
       const editor = editorRef.current?.getInstance();
@@ -37,7 +34,7 @@ export default function PostWrite() {
     }
   };
 
-  // 글 등록하기
+  // 글 등록
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -62,7 +59,6 @@ export default function PostWrite() {
     if (!markdownContent.trim()) {
       setContentError('내용을 입력해주세요');
       if (isValid) {
-        // 내용에만 에러가 났을 경우 에디터로 포커스 유도
         const editorElement = editorInstance.getEditorElements();
         editorElement?.wwEditor?.querySelector('.ProseMirror')?.focus();
       }
@@ -83,7 +79,7 @@ export default function PostWrite() {
       isSaved = true;
 
       const postId = response.data.data;
-      navigate(`/post/view?id=${postId}`);
+      navigate(`/post/view?id=${postId}`, { replace: true });
     } catch (error) {
       console.error('글 등록 중 에러 발생:', error);
       if (isSaved) {

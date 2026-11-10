@@ -17,7 +17,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return memberRepository.findByEmail(email)
+        return memberRepository.fetchByEmail(email)
                 .map(CustomUserDetails::new)
                 .orElseThrow(() -> new UsernameNotFoundException("이메일 또는 비밀번호가 유효하지 않습니다"));
     }

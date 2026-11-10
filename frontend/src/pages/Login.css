@@ -1,3 +1,4 @@
+/* ----- LAYOUT ----- */
 .login-wrapper {
   display: flex;
   justify-content: center;
@@ -12,6 +13,7 @@
   width: 400px;
 }
 
+/* ----- WELCOME MESSAGE ----- */
 #welcome-message {
   width: 100%;
   padding: 5px 10px;
@@ -22,6 +24,7 @@
   font-weight: 500;
 }
 
+/* ----- LOGIN ----- */
 .sign-in-box {
   width: 100%;
   padding: 50px 50px;
@@ -92,7 +95,7 @@
   background-color: #1557b0; 
 }
 
-/* SIGN UP & FIND PASSWORD */
+/* ----- SIGN UP & FIND PASSWORD ----- */
 .sign-in-box .sign-in-box-more-action {
   font-size: 13px;
   text-align: center;

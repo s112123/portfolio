@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
 import './Comment.css';
 
+// 날짜 포맷
 const formatDateTime = (dateString) => {
   if (!dateString) return '';
   const replaced = dateString.replace('T', ' ');
@@ -10,7 +11,6 @@ const formatDateTime = (dateString) => {
 
 export default function Comment({ postId, currentUser }) {
   const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
-  
   const [commentData, setCommentData] = useState({
     content: [],
     currentPage: 1,
@@ -20,28 +20,21 @@ export default function Comment({ postId, currentUser }) {
     totalElements: 0,
     size: 5
   });
-
   const [currentPage, setCurrentPage] = useState(1);
   const [commentContent, setCommentContent] = useState('');
-
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyingToNickname, setReplyingToNickname] = useState(''); 
   const [replyContent, setReplyContent] = useState('');
-
-  // 입력창 포커스를 위한 useRef 선언
   const commentInputRef = useRef(null);
   const replyInputRef = useRef(null);
+  const commentsEndRef = useRef(null);
 
-  const getProfileImageUrl = (profileImageUrl) => {
-    if (!profileImageUrl) return 'https://via.placeholder.com/24';
-    if (profileImageUrl.startsWith('http')) return profileImageUrl;
-    return `${baseUrl}${profileImageUrl}`;
-  };
-
+  // 댓글 조회
   useEffect(() => {
     fetchComments(currentPage);
   }, [postId, currentPage]);
 
+  // 댓글 위치에 따른 스크롤 위치 조정
   useEffect(() => {
     if (replyingTo !== null && replyInputRef.current) {
       replyInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -49,6 +42,7 @@ export default function Comment({ postId, currentUser }) {
     }
   }, [replyingTo]);
 
+  // 댓글 조회 함수
   const fetchComments = async (page) => {
     try {
       const response = await api.get(`/v1/comments?postId=${postId}&page=${page}`); 
@@ -58,7 +52,14 @@ export default function Comment({ postId, currentUser }) {
     }
   };
 
-  // 일반 댓글 등록
+  // 프로필 이미지 URL 처리
+  const getProfileImageUrl = (profileImageUrl) => {
+    if (!profileImageUrl) return 'https://via.placeholder.com/24';
+    if (profileImageUrl.startsWith('http')) return profileImageUrl;
+    return `${baseUrl}${profileImageUrl}`;
+  };
+
+  // 댓글 등록
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!currentUser) {
@@ -66,7 +67,6 @@ export default function Comment({ postId, currentUser }) {
       return;
     }
     
-    // 내용이 없을 때 입력창에 포커스 주기
     if (!commentContent.trim()) {
       if (commentInputRef.current) {
         commentInputRef.current.focus();
@@ -82,20 +82,24 @@ export default function Comment({ postId, currentUser }) {
         parentId: null
       };
 
-      const response = await api.post('/v1/comments', requestData);
+      await api.post('/v1/comments', requestData);
       setCommentContent('');
       
-      // 💡 백엔드가 등록 후 갱신된 PageResult 데이터를 내려준다면 곧바로 마지막 페이지로 이동 가능합니다.
-      // 만약 응답으로 전체 데이터를 주지 않는다면 아래와 같이 계산하거나 재조회할 수 있습니다.
-      // 여기서는 최신 댓글이 마지막에 달리므로, 등록 후 전체 개수 기반 마지막 페이지로 이동합니다.
+      // 댓글 등록 시, 마지막 페이지로 이동
       const updatedTotalElements = commentData.totalElements + 1;
       const calculatedLastPage = Math.ceil(updatedTotalElements / commentData.size) || 1;
 
       if (currentPage === calculatedLastPage) {
-        fetchComments(calculatedLastPage);
+        await fetchComments(calculatedLastPage);
       } else {
         setCurrentPage(calculatedLastPage);
       }
+
+      // 댓글 등록 후 하단으로 스크롤 이동
+      setTimeout(() => {
+        commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+
     } catch (error) {
       console.error('댓글 등록 실패:', error);
       alert(error.response?.data?.message || '댓글 등록에 실패했습니다.');
@@ -109,7 +113,6 @@ export default function Comment({ postId, currentUser }) {
       return;
     }
 
-    // 답글 내용이 없을 때 답글 입력창에 포커스 주기
     if (!replyContent.trim()) {
       if (replyInputRef.current) {
         replyInputRef.current.focus();
@@ -130,26 +133,70 @@ export default function Comment({ postId, currentUser }) {
       setReplyContent('');
       setReplyingTo(null);
       setReplyingToNickname('');
-      
-      // 답글 등록 시에도 최신 반영을 위해 마지막 페이지(또는 현재 페이지 유지)로 갱신
-      fetchComments(currentPage);
+
+      // 답글을 작성한 대상 댓글의 현재 페이지 위치 확인
+      const targetIndex = commentData.content.findIndex(
+        comment => String(comment.id) === String(targetCommentId)
+      );
+
+      // 대상 댓글이 현재 페이지에 없으면 현재 페이지 새로고침
+      if (targetIndex === -1) {
+        await fetchComments(currentPage);
+        return;
+      }
+
+      // 전체 댓글 목록에서 대상 댓글의 인덱스 계산
+      const parentGlobalIndex = (currentPage - 1) * commentData.size + targetIndex;
+
+      // 대상 댓글의 전체 자손 댓글 수
+      const targetComment = commentData.content[targetIndex];
+      const replyCount = Number(targetComment.replyCount || 0);
+
+      // 새로 등록한 답글이 들어갈 전체 목록의 인덱스
+      // 부모 댓글 + 기존 자손 댓글 뒤에 새 답글이 추가된다
+      const newReplyIndex = parentGlobalIndex + replyCount + 1;
+      // 새 답글이 위치할 페이지 계산
+      const targetPage = Math.floor(newReplyIndex / commentData.size) + 1;
+
+      // 페이지 이동 또는 현재 페이지 새로고침
+      if (currentPage !== targetPage) {
+        setCurrentPage(targetPage);
+      } else {
+        await fetchComments(targetPage);
+      }
+
+      // 스크롤 이동
+      setTimeout(() => {
+        commentsEndRef.current?.scrollIntoView({
+          behavior: 'smooth'
+        });
+      }, 100);
+
     } catch (error) {
       console.error('답글 등록 실패:', error);
       alert(error.response?.data?.message || '답글 등록에 실패했습니다.');
     }
   };
 
+  // 댓글 삭제
   const handleCommentDelete = async (commentId) => {
     if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
     try {
       await api.delete(`/v1/comments/${commentId}`);
-      fetchComments(currentPage);
+      // 삭제 후 현재 페이지에 데이터가 없고 1페이지보다 크면 앞 페이지로 이동
+      const remainingElements = commentData.totalElements - 1;
+      const maxPage = Math.ceil(remainingElements / commentData.size) || 1;
+      const targetPage = currentPage > maxPage ? maxPage : currentPage;
+      
+      setCurrentPage(targetPage);
+      fetchComments(targetPage);
     } catch (error) {
       console.error('댓글 삭제 실패:', error);
       alert(error.response?.data?.message || '댓글 삭제에 실패했습니다.');
     }
   };
 
+  // 댓글 페이지네이션 관련 변수
   const maxPageButtons = 5;
   const currentBlock = Math.ceil(commentData.currentPage / maxPageButtons);
   const startPage = (currentBlock - 1) * maxPageButtons + 1;
@@ -158,6 +205,8 @@ export default function Comment({ postId, currentUser }) {
   return (
     <div className="comments-section">
       <h3>댓글 ({commentData.totalElements})</h3>
+      
+      {/* 댓글 입력 */}
       <form onSubmit={handleCommentSubmit} className="comment-form">
         <div className="comment-input-container">
           <textarea 
@@ -178,12 +227,12 @@ export default function Comment({ postId, currentUser }) {
             {commentContent.length} / 100자
           </span>
         </div>
-
         {currentUser && (
           <button type="submit" className="btn-comment-submit">등록</button>
         )}
       </form>
 
+      {/* 댓글 목록 */}
       <div className="comment-list">
         {commentData.content.map((comment) => {
           const isCommentWriter = currentUser && String(currentUser.memberId) === String(comment.writer?.id);
@@ -218,7 +267,6 @@ export default function Comment({ postId, currentUser }) {
                   {formatDateTime(comment.registeredAt)}
                 </span>
               </div>
-
               <p className="comment-text">
                 {isReply && (
                   <span className="comment-mention">
@@ -227,7 +275,6 @@ export default function Comment({ postId, currentUser }) {
                 )}
                 {comment.content}
               </p>
-
               <div className="comment-actions">
                 {currentUser && (
                   <button 
@@ -259,6 +306,7 @@ export default function Comment({ postId, currentUser }) {
                 )}
               </div>
 
+              {/* 답글 등록 */}
               {replyingTo === comment.id && (
                 <div className="reply-form">
                   <div className="reply-form-header">
@@ -277,7 +325,6 @@ export default function Comment({ postId, currentUser }) {
                       닫기 ✕
                     </button>
                   </div>
-
                   <div className="reply-input-wrapper">
                     <textarea 
                       ref={replyInputRef} 
@@ -305,6 +352,10 @@ export default function Comment({ postId, currentUser }) {
         })}
       </div>
 
+      {/* 스크롤 위치 타겟용 빈 엘리먼트 */}
+      <div ref={commentsEndRef} />
+
+      {/* 페이지네이션 */}
       {commentData.totalPages > 1 && (
         <div className="comment-pagination">
           {startPage > 1 && (
@@ -316,7 +367,6 @@ export default function Comment({ postId, currentUser }) {
               <i className="fa-solid fa-angle-left"></i>
             </button>
           )}
-
           {Array.from({ length: (endPage - startPage + 1) }, (_, index) => {
             const pageNum = startPage + index;
             return (
@@ -330,7 +380,6 @@ export default function Comment({ postId, currentUser }) {
               </button>
             );
           })}
-
           {endPage < commentData.totalPages && (
             <button
               type="button"

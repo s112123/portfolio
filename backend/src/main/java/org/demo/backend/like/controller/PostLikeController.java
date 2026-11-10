@@ -1,7 +1,7 @@
 package org.demo.backend.like.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.demo.backend.global.api.dto.ApiResponse;
+import org.demo.backend.global.web.dto.ApiResponse;
 import org.demo.backend.like.application.PostLikeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -1,10 +1,10 @@
-/* 댓글 영역 전체 컨테이너 */
+/* ----- LAYOUT ----- */
 .comments-section {
   margin-top: 30px;
   margin-bottom: 200px;
 }
 
-/* 댓글 입력 폼 */
+/* ----- COMMENT INPUT ----- */
 .comment-form {
   display: flex;
   flex-direction: column;
@@ -65,12 +65,11 @@
   margin-left: auto;
 }
 
-/* 댓글 목록 */
+/* ----- COMMENT LIST ----- */
 .comment-list {
   margin-top: 20px;
 }
 
-/* 댓글 아이템 기본 구조 (부모 댓글) */
 .comment-item {
   padding: 16px 0 !important;
   border-bottom: 1px solid #d6dbe0 !important;
@@ -79,7 +78,6 @@
   border-left: 2px solid #cbd5e1 !important;
 }
 
-/* 자식 댓글(대댓글)인 경우의 들여쓰기 및 선 스타일 */
 .comment-reply-item {
   margin-left: 35px !important;
   padding: 16px 0 !important;
@@ -89,7 +87,6 @@
   border-left: 2px solid #cbd5e1 !important;
 }
 
-/* 댓글 메타 정보 (프로필 + 닉네임 + 날짜) */
 .comment-meta-header {
   display: flex;
   align-items: center;
@@ -127,7 +124,6 @@
   font-size: 0.8rem;
 }
 
-/* 댓글 본문 */
 .comment-text {
   margin: 6px 0 10px 0;
   font-size: 0.95rem;
@@ -140,7 +136,6 @@
   margin-right: 6px;
 }
 
-/* 하단 액션 버튼 (답글 / 삭제) */
 .comment-actions {
   display: flex;
   gap: 10px;
@@ -165,7 +160,7 @@
   color: #dc3545;
 }
 
-/* 답글 작성 토글 폼 */
+/* ----- REPLY ----- */
 .reply-form {
   margin-top: 15px;
   padding: 12px;
@@ -245,7 +240,7 @@
   align-self: flex-end; 
 }
 
-/* 댓글 페이지네이션 */
+/* ----- PAGINATEION ----- */
 .comment-pagination {
   display: flex;
   justify-content: center;

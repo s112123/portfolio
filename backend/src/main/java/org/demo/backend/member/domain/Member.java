@@ -61,4 +61,9 @@ public class Member extends BaseTimeEntity {
     public void updatePassword(String encodedPassword) {
         this.password = encodedPassword;
     }
+
+    // 권한 변경
+    public void updateRole(MemberRole role) {
+        this.role = role;
+    }
 }

@@ -6,31 +6,22 @@ import './Header.css';
 const Header = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatTab, setChatTab] = useState('friend-list-container');
   const [activeChatRoom, setActiveChatRoom] = useState(null);
-
-  // 검색어 상태 (URL 쿼리 파라미터에서 초기값 동기화)
   const [searchTerm, setSearchTerm] = useState(searchParams.get('keyword') || '');
-
   const notificationRef = useRef(null);
   const messageRef = useRef(null);
 
-  // URL의 keyword가 바뀔 때 입력창 상태 동기화
+  // URL 쿼리 스트링의 keyword 와 검색어 입력란 동기화
   useEffect(() => {
     setSearchTerm(searchParams.get('keyword') || '');
   }, [searchParams]);
 
-  // 로그인 상태 동기화 함수
-  const checkLoginStatus = () => {
-    const token = localStorage.getItem('itBlogAccessToken');
-    setIsLoggedIn(!!token);
-  };
-
+  // 로그인 상태 여부
   useEffect(() => {
     checkLoginStatus();
 
@@ -43,7 +34,7 @@ const Header = () => {
     };
   }, []);
 
-  // 화면 외부 클릭 시 드롭다운 닫기 처리
+  // 알림, 채팅 드랍다운이 열렸을 때, 창 외부 클릭시 닫기 처리
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (notificationRef.current && !notificationRef.current.contains(event.target)) {
@@ -60,6 +51,13 @@ const Header = () => {
     };
   }, []);
 
+  // 로그인 상태
+  const checkLoginStatus = () => {
+    const token = localStorage.getItem('itBlogAccessToken');
+    setIsLoggedIn(!!token);
+  };
+
+  // 로그아웃
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
@@ -74,14 +72,14 @@ const Header = () => {
     }
   };
 
-  // 검색 실행 핸들러 (엔터 또는 검색 버튼 클릭)
+  // 검색
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     const trimmedKeyword = searchTerm.trim();
     if (trimmedKeyword) {
       navigate(`/?keyword=${encodeURIComponent(trimmedKeyword)}`);
     } else {
-      navigate(`/`); // 검색어가 없으면 기본 메인으로
+      navigate(`/`);
     }
   };
 
@@ -89,6 +87,7 @@ const Header = () => {
     <>
       <header className="header">
         <div className="container header-container">
+          {/* 로고 */}
           <div className="logo" id="logo">
             <Link to="/" 
                   className="logo-link"
@@ -102,8 +101,7 @@ const Header = () => {
               It's blog
             </Link>
           </div>
-
-          {/* 검색바 영역 */}
+          {/* 검색 */}
           <form onSubmit={handleSearchSubmit} className="search-box">
             <input 
               type="text" 
@@ -116,7 +114,7 @@ const Header = () => {
               <i className="fa-solid fa-magnifying-glass"></i>
             </button>
           </form>
-
+          {/* 네비게이션 */}
           <nav className="nav">
             <ul>
               {isLoggedIn ? (
@@ -139,7 +137,6 @@ const Header = () => {
                       <button type="button" id="btn-notification-more">전체 알림</button>
                     </div>
                   </li>
-
                   <li id="message" className={isMessageOpen ? 'active' : ''} ref={messageRef}>
                     <a
                       href="# "
@@ -167,13 +164,11 @@ const Header = () => {
                       </button>
                     </div>
                   </li>
-
                   <li id="profile">
                     <Link to="/profile">
                       <i className="fa-solid fa-user"></i>
                     </Link>
                   </li>
-
                   <li>
                     <a href="# " id="logout" onClick={handleLogout}>
                       <i className="fa-solid fa-right-from-bracket"></i>
@@ -190,8 +185,7 @@ const Header = () => {
           </nav>
         </div>
       </header>
-
-      {/* 채팅 창 영역 */}
+      {/* 채팅 목록 */}
       {isLoggedIn && (
         <div id="chat-window" className={`draggable-module ${isChatOpen ? 'active' : ''}`}>
           <div id="chat-header">

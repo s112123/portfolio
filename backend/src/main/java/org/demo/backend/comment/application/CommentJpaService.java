@@ -7,8 +7,8 @@ import org.demo.backend.comment.domain.Comment;
 import org.demo.backend.comment.domain.CommentErrorCode;
 import org.demo.backend.comment.domain.CommentRepository;
 import org.demo.backend.comment.persistence.CommentProjection;
-import org.demo.backend.global.api.dto.PageResult;
 import org.demo.backend.global.exception.BusinessException;
+import org.demo.backend.global.web.dto.PageDetail;
 import org.demo.backend.member.domain.Member;
 import org.demo.backend.member.domain.MemberErrorCode;
 import org.demo.backend.member.domain.MemberRepository;
@@ -17,6 +17,8 @@ import org.demo.backend.post.domain.PostErrorCode;
 import org.demo.backend.post.domain.PostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,7 +31,7 @@ public class CommentJpaService implements CommentService {
 
     @Override
     @Transactional
-    public CommentDetail create(CommentCreateRequest request) {
+    public CommentDetail save(CommentCreateRequest request) {
         // 1. 게시물 조회
         Post post = postRepository.findById(request.getPostId())
                 .orElseThrow(() -> new BusinessException(PostErrorCode.NOT_FOUND));
@@ -49,6 +51,12 @@ public class CommentJpaService implements CommentService {
     }
 
     @Override
+    public PageDetail<CommentDetail> fetchByPostId(Long postId, int page, int size) {
+        PageDetail<CommentProjection> projection = commentRepository.fetchPageByPostId(postId, page, size);
+        return projection.map(p -> CommentDetail.ofCommentProject(p));
+    }
+
+    @Override
     @Transactional
     public void deleteById(Long commentId) {
         // 1. 댓글이 있는지 조회
@@ -59,8 +67,8 @@ public class CommentJpaService implements CommentService {
     }
 
     @Override
-    public PageResult<CommentDetail> readAllByPostId(Long postId, int page, int size) {
-        PageResult<CommentProjection> projection = commentRepository.fetchAllByPostId(postId, page, size);
-        return projection.map(p -> CommentDetail.ofCommentProject(p));
+    @Transactional
+    public int deleteByPostIdIn(List<Long> postIds) {
+        return commentRepository.deleteByPostIdIn(postIds);
     }
 }

@@ -19,7 +19,7 @@ public class FileCleanupScheduler {
 
     private final PostImageRepository postImageRepository;
 
-    // 임시 파일 삭제 (매일 새벽 3시마다)
+    // 글의 임시 파일 삭제 (매일 새벽 3시마다)
     // ShedLock 대신 분산 락으로 다른 서버가 스케쥴러를 돌리지 못하도록 구현해도 된다
     @Scheduled(cron = "0 0 3 * * *")
     @SchedulerLock(
@@ -43,7 +43,7 @@ public class FileCleanupScheduler {
                 FileUtils.deleteFile(orphanImage.getFilePath());
             }
             // DB 레코드 일괄 삭제
-            postImageRepository.deleteAllInBatch(orphanImages);
+            postImageRepository.deleteByPostImageIn(orphanImages);
         }
     }
 }

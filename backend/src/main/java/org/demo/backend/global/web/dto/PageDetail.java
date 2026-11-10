@@ -1,4 +1,4 @@
-package org.demo.backend.global.api.dto;
+package org.demo.backend.global.web.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PageResult<T> {
+public class PageDetail<T> {
 
     @Builder.Default
     private List<T> content = new ArrayList<>();
@@ -25,12 +25,12 @@ public class PageResult<T> {
     private long totalElements;
     private int size;
 
-    public <R> PageResult<R> map(Function<T, R> converter) {
+    public <R> PageDetail<R> map(Function<T, R> converter) {
         List<R> convertedContent = this.content.stream()
                 .map(converter)
                 .collect(Collectors.toList());
 
-        return PageResult.<R>builder()
+        return PageDetail.<R>builder()
                 .content(convertedContent)
                 .currentPage(this.currentPage)
                 .totalPages(this.totalPages)

@@ -1,6 +1,10 @@
-package org.demo.backend.global.jwt.persistence.cache;
+package org.demo.backend.global.jwt.domain.cache;
 
-public abstract class JwtCacheKey {
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class JwtCacheKey {
 
     // JWT 를 저장하는 키
     private static final String JWT_PREFIX = "jwt:";

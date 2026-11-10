@@ -5,12 +5,11 @@ import org.demo.backend.global.exception.BusinessException;
 import org.demo.backend.member.application.dto.MemberDetail;
 import org.demo.backend.member.controller.dto.MemberCreateRequest;
 import org.demo.backend.member.controller.dto.PasswordChangeRequest;
-import org.demo.backend.member.domain.Member;
-import org.demo.backend.member.domain.MemberErrorCode;
-import org.demo.backend.member.domain.MemberRepository;
-import org.demo.backend.member.domain.ProfileImageProperties;
+import org.demo.backend.member.domain.*;
+import org.demo.backend.member.event.MemberDeleteEvent;
 import org.demo.backend.otp.application.OtpService;
 import org.demo.backend.otp.domain.OtpErrorCode;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +26,12 @@ public class MemberJpaService implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final ProfileImageProperties profileImageProperties;
     private final OtpService otpService;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 회원 등록
     @Override
     @Transactional
-    public MemberDetail create(MemberCreateRequest request) {
+    public MemberDetail save(MemberCreateRequest request) {
         // 1. 인증 코드 검증 상태 확인
         if (!otpService.isVerified(request.getEmail())) {
             throw new BusinessException(OtpErrorCode.NOT_VERIFIED_CODE);
@@ -56,7 +56,7 @@ public class MemberJpaService implements MemberService {
     }
 
     @Override
-    public MemberDetail readById(Long memberId) {
+    public MemberDetail findById(Long memberId) {
         // 회원 조회
         Member foundMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(MemberErrorCode.NOT_FOUND));
@@ -64,23 +64,31 @@ public class MemberJpaService implements MemberService {
     }
 
     @Override
+    @Transactional
     public void deleteById(Long memberId) {
         // 1. 회원 조회
-        Member foundMember = memberRepository.findById(memberId)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(MemberErrorCode.NOT_FOUND));
-        // 2. 파일 삭제
-        // 3. 회원 삭제
-        memberRepository.deleteById(foundMember.getId());
+        // 2. 회원 삭제
+        eventPublisher.publishEvent(MemberDeleteEvent.of(member));
     }
 
     @Override
     @Transactional
     public String changePassword(PasswordChangeRequest request) {
         String rePassword = "1234";
-        Member member = memberRepository.findByEmail(request.getEmail())
+        Member member = memberRepository.fetchByEmail(request.getEmail())
                 .orElseThrow(() -> new BusinessException(MemberErrorCode.NOT_FOUND));
         member.updatePassword(passwordEncoder.encode(rePassword));
         return rePassword;
+    }
+
+    @Override
+    @Transactional
+    public void changeRole(Long memberId, MemberRole role) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(MemberErrorCode.NOT_FOUND));
+        member.updateRole(role);
     }
 
     // 고유한 닉네임 생성

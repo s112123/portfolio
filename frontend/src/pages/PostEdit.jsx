@@ -13,18 +13,15 @@ import './PostEdit.css';
 export default function PostUpdate() {
   const [title, setTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // 유효성 검사 에러 메시지 상태 관리
   const [titleError, setTitleError] = useState('');
   const [contentError, setContentError] = useState('');
-
   const titleRef = useRef(null);
   const editorRef = useRef();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const postId = searchParams.get('id');
 
-  // 글 조회하기
+  // 글 조회
   useEffect(() => {
     const fetchExistingPost = async () => {
       if (!postId) {
@@ -34,7 +31,6 @@ export default function PostUpdate() {
       }
 
       try {
-        // 글 조회하기
         const response = await api.get(`/v1/posts/${postId}`);
         const postData = response.data.data;
 
@@ -54,8 +50,8 @@ export default function PostUpdate() {
     fetchExistingPost();
   }, [postId, navigate]);
 
+  // 제목란에서 탭을 누르면 에디터로 이동
   const handleTitleKeyDown = (e) => {
-    // 제목에서 탭을 누르면 에디터로 이동
     if (e.key === 'Tab' && !e.shiftKey) {
       e.preventDefault();
       const editor = editorRef.current?.getInstance();
@@ -64,7 +60,7 @@ export default function PostUpdate() {
     }
   };
 
-  // 글 수정하기
+  // 글 수정
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -89,7 +85,7 @@ export default function PostUpdate() {
     if (!markdownContent.trim()) {
       setContentError('내용을 입력해주세요');
       if (isValid) {
-        // 내용에만 에러가 났을 경우 에디터로 포커스 유도
+        // 내용에만 에러가 났을 경우 에디터로 포커스
         const editorElement = editorInstance.getEditorElements();
         editorElement?.wwEditor?.querySelector('.ProseMirror')?.focus();
       }
@@ -108,7 +104,7 @@ export default function PostUpdate() {
       setIsSubmitting(true);
       await api.put(`/v1/posts/${postId}`, postData);
       isSaved = true;
-      navigate(`/post/view?id=${postId}`);
+      navigate(`/post/view?id=${postId}`, { replace: true });
     } catch (error) {
       // console.error('글 수정 중 에러 발생:', error);
       if (isSaved) {

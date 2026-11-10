@@ -2,8 +2,8 @@ package org.demo.backend.post.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.demo.backend.global.api.dto.ApiResponse;
 import org.demo.backend.global.file.dto.FileUploadRequest;
+import org.demo.backend.global.web.dto.ApiResponse;
 import org.demo.backend.post.application.PostImageService;
 import org.demo.backend.post.application.dto.PostImageDetail;
 import org.springframework.core.io.InputStreamResource;

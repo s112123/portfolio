@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,18 +22,18 @@ public class PostImageRepositoryAdapter implements PostImageRepository {
     }
 
     @Override
-    public Optional<PostImage> findByStoredFilename(String storedFilename) {
-        return postImageJpaRepository.findByStoredFilename(storedFilename);
+    public int attachImageByFilenameIn(Post post, List<String> filenames) {
+        return postImageJpaRepository.attachImageByFilenameIn(post, filenames);
     }
 
     @Override
-    public int attachImages(Post post, List<String> filenames) {
-        return postImageJpaRepository.attachImages(post, filenames);
+    public int detachImageByFilenameIn(List<String> filenames) {
+        return postImageJpaRepository.detachImageByFilenameIn(filenames);
     }
 
     @Override
-    public int detachImages(List<String> filenames) {
-        return postImageJpaRepository.detachImages(filenames);
+    public int detachImageByIdIn(List<Long> ids) {
+        return postImageJpaRepository.detachImageByIdIn(ids);
     }
 
     @Override
@@ -43,7 +42,7 @@ public class PostImageRepositoryAdapter implements PostImageRepository {
     }
 
     @Override
-    public void deleteAllInBatch(List<PostImage> postImages) {
+    public void deleteByPostImageIn(List<PostImage> postImages) {
         postImageJpaRepository.deleteAllInBatch(postImages);
     }
 }

@@ -24,14 +24,14 @@ const parseJwt = (token) => {
   }
 };
 
-// 날짜 포맷팅 함수 (yyyy-MM-dd HH:mm:ss)
+// 날짜 포맷 함수 (yyyy-MM-dd HH:mm:ss)
 const formatDateTime = (dateString) => {
   if (!dateString) return '';
   const replaced = dateString.replace('T', ' ');
   return replaced.split('.')[0];
 };
 
-// 숫자 포맷팅 함수 (K, M, B 단위 지원: 1500 -> 1.5K, 21000 -> 21K)
+// 숫자 포맷 함수 (K, M, B 단위 지원: 1500 -> 1.5K, 21000 -> 21K)
 const formatCount = (count) => {
   if (count === undefined || count === null) return 0;
   if (count >= 1_000_000_000) {
@@ -56,6 +56,7 @@ export default function PostRead() {
   const [currentUser, setCurrentUser] = useState(null); 
   const [liked, setLiked] = useState(false);
 
+  // 글 조회
   useEffect(() => {
     if (!postId) {
       alert('잘못된 접근입니다.');
@@ -74,6 +75,7 @@ export default function PostRead() {
     fetchPostData();
   }, [postId]);
 
+  // 글 조회
   const fetchPostData = async () => {
     try {
       const response = await api.get(`/v1/posts/${postId}`);
@@ -84,17 +86,18 @@ export default function PostRead() {
     } catch (error) {
       console.error('게시글 조회 실패:', error);
       setPost({
-        title: '게시글 화면 UI 미리보기 샘플',
-        content: '본문 내용입니다. 아래 댓글 UI를 확인해보세요.',
+        title: '글 제목',
+        content: '글 내용',
         likes: 12,
         registeredAt: '2026-03-30T09:00:00',
-        writer: { id: 'writer01', nickname: '작성자', profileImageUrl: '' }
+        writer: { id: 'user1', nickname: '작성자', profileImageUrl: '' }
       });
     } finally {
       setLoading(false);
     }
   };
 
+  // 좋아요 등록 / 취소
   const handleLikeToggle = async () => {
     if (!currentUser) {
       alert('로그인 후 이용해주세요.');
@@ -123,8 +126,26 @@ export default function PostRead() {
     }
   };
 
+  // 글 삭제
+  const handleDeletePost = async () => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      await api.delete(`/v1/posts/${postId}`);
+      alert('게시글이 삭제되었습니다.');
+      navigate('/');
+    } catch (error) {
+      console.error('게시글 삭제 실패:', error);
+      alert(error.response?.data?.message || '게시글 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 로딩 처리
   if (loading) return <div className="loading">로딩 중...</div>;
 
+  // 글 조회하는 사람이 글 작성자와 동일한지 확인
   const isAuthor = currentUser && post && post.writer && 
     String(currentUser.memberId) === String(post.writer.id);
 
@@ -164,10 +185,11 @@ export default function PostRead() {
         {isAuthor && (
           <div className="author-actions">
             <button onClick={() => navigate(`/post/edit?id=${postId}`)} className="btn-edit">수정</button>
-            <button onClick={() => { if(window.confirm('정말 삭제하시겠습니까?')) {} }} className="btn-delete">삭제</button>
+            <button onClick={handleDeletePost} className="btn-delete">삭제</button>
           </div>
         )}
       </div>
+      {/* 댓글 */}
       <Comment postId={postId} currentUser={currentUser} />
     </div>
   );

@@ -1,6 +1,10 @@
 package org.demo.backend.post.domain.cache;
 
-public abstract class PostHitsCacheKey {
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class PostHitsCacheKey {
 
     // 조회 수 증분 값을 저장하는 키
     // 자료구조 → HASH
@@ -8,7 +12,6 @@ public abstract class PostHitsCacheKey {
     // value → postId=delta
     // ttl → 없음
     private static final String POST_HITS_DELTA_KEY = "post:hits:delta";
-
     // 사용자별 조회 여부를 저장하는 키
     // 자료구조 → SET
     // key → post:viewers:{postId}

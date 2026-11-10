@@ -1,10 +1,9 @@
-/* 404 페이지 컨테이너 */
+/* ----- LAYOUT ----- */
 .not-found-container {
   text-align: center;
   margin-top: 100px;
 }
 
-/* 404 타이틀 */
 .not-found-title {
   font-size: 2rem;
   font-weight: bold;
@@ -12,14 +11,12 @@
   margin-bottom: 10px;
 }
 
-/* 안내 문구 */
 .not-found-desc {
   font-size: 1rem;
   color: #666;
   margin: 0;
 }
 
-/* 404 홈으로 돌아가기 버튼 (고유 클래스명 사용) */
 .btn-not-found-home {
   padding: 8px 16px;
   background-color: #007bff;

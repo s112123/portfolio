@@ -17,7 +17,7 @@ public interface MemberRepository {
     Optional<Member> findById(Long memberId);
 
     // 회원 조회
-    Optional<Member> findByEmail(String email);
+    Optional<Member> fetchByEmail(String email);
 
     // 회원 삭제
     void deleteById(Long memberId);

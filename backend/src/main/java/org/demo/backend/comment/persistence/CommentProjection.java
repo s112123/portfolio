@@ -15,6 +15,8 @@ public interface CommentProjection {
     LocalDateTime getRegisteredAt();
     @Value("#{target.parent_id}")
     Long getParentId();
+    @Value("#{target.reply_count}")
+    int getReplyCount();
 
     // 작성자 (Member) 정보 명시적 매핑
     @Value("#{target.writer_id}")

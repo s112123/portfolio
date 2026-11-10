@@ -1,4 +1,4 @@
-/* 기본 컨테이너 */
+/* ----- LAYOUT ----- */
 .main-container {
   width: 1200px;
   min-height: 70vh;
@@ -7,7 +7,17 @@
   box-sizing: border-box;
 }
 
-/* TOP (정렬 탭 및 글쓰기 버튼) */
+/* ----- LOADING ----- */
+.loading-container {
+  min-height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  color: #888;
+}
+
+/* ----- SORT BUTTON ----- */
 .posts-top {
   margin: 55px 0 30px 0;
   display: flex;
@@ -48,8 +58,7 @@
   font-weight: 500;
 }
 
-/* [수정] 기존의 .posts-top #sort-all { display: none; } 구문을 삭제했습니다. */
-
+/* ----- WRITE BUTTON ----- */
 .posts-top #btn-add-post {
   display: inline-block;
   width: 80px;
@@ -69,7 +78,7 @@
   background-color: rgb(185, 30, 30);
 }
 
-/* MIDDLE (게시글 영역) */
+/* ----- POST LIST ----- */
 .posts-middle {
   position: relative;
   width: 100%;
@@ -92,14 +101,13 @@
   box-sizing: border-box;
 }
 
-/* 카드 그리드 레이아웃 설정 (5열 배치) */
 .post-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr); 
   gap: 25px;
 }
 
-/* 개별 카드 아이템 박스 */
+/* ----- POST CARD ----- */
 .post-card {
   background-color: #fff;
   border: 1px solid rgb(220, 220, 220);
@@ -134,8 +142,8 @@
   overflow: hidden;
   background-color: rgb(245, 245, 245);
   /* border-bottom: 1px solid rgb(220, 220, 220) !important; */
-  display: block; /* 링크가 영역 전체를 차지하도록 설정 */
-  cursor: pointer; /* 마우스 올렸을 때 손가락 모양으로 변경 */
+  display: block; 
+  cursor: pointer;
 }
 
 .thumbnail-img {
@@ -251,13 +259,4 @@
 
 .post-item-icon span {
   margin-right: 8px;
-}
-
-.loading-container {
-  min-height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 14px;
-  color: #888;
 }

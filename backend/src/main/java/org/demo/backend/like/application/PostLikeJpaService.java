@@ -12,8 +12,11 @@ import org.demo.backend.post.domain.Post;
 import org.demo.backend.post.domain.PostErrorCode;
 import org.demo.backend.post.domain.PostRepository;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,9 +38,9 @@ public class PostLikeJpaService implements PostLikeService {
 
         try {
             // 3. 좋아요 등록
-            postLikeRepository.savePostLike(PostLike.of(member, post));
+            postLikeRepository.save(PostLike.of(member, post));
             // 4. 좋아요 +1 증가 (동시성 문제 해결 → 원자적 업데이트)
-            postRepository.incrementPostLike(postId);
+            postRepository.incrementLikeById(postId);
         } catch (DataIntegrityViolationException e) {
             throw new BusinessException(PostLikeErrorCode.ALREADY_LIKES);
         }
@@ -51,12 +54,29 @@ public class PostLikeJpaService implements PostLikeService {
                 .orElseThrow(() -> new BusinessException(PostLikeErrorCode.NOT_FOUND));
         // 2. 좋아요 취소 (삭제)
         postLikeRepository.deleteById(postLike.getId());
-        // 2. 좋아요 -1 감소 (동시성 문제 해결 → 원자적 업데이트 + p.likes > 0 조건으로 0 이하 방지)
-        postRepository.decrementPostLike(postId);
+        // 3. 좋아요 -1 감소 (동시성 문제 해결 → 원자적 업데이트 + p.likes > 0 조건으로 0 이하 방지)
+        postRepository.decrementLikeById(postId);
     }
 
     @Override
     public boolean existsByMemberIdAndPostId(Long memberId, Long postId) {
         return postLikeRepository.existsByMemberIdAndPostId(memberId, postId);
+    }
+
+    @Override
+    @Transactional
+    public void deleteByPostIdIn(List<Long> postId) {
+        postLikeRepository.deleteByPostIdIn(postId);
+    }
+
+    @Override
+    @Transactional
+    public void deleteByMemberId(Long memberId) {
+        postLikeRepository.deleteByMemberId(memberId);
+    }
+
+    @Override
+    public Page<PostLike> findPageByMemberId(Long memberId, int page, int size) {
+        return postLikeRepository.fetchPageByMemberId(memberId, page, size);
     }
 }

@@ -22,5 +22,5 @@ public interface MemberJpaRepository extends JpaRepository<Member, Long> {
                     "LEFT JOIN FETCH m.profileImage " +
                     "WHERE m.email = :email"
     )
-    Optional<Member> findByEmail(@Param("email") String email);
+    Optional<Member> fetchByEmail(@Param("email") String email);
 }

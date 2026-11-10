@@ -25,6 +25,12 @@ public enum MemberErrorCode implements ErrorCode {
             HttpStatus.UNAUTHORIZED,
             "UNAUTHORIZED",
             "권한이 없습니다"
+    ),
+
+    FORBIDDEN(
+            HttpStatus.FORBIDDEN,
+            "FORBIDDEN",
+            "권한이 없습니다"
     );
 
     private final HttpStatus status;

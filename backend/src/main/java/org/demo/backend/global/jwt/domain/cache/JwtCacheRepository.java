@@ -1,4 +1,4 @@
-package org.demo.backend.global.jwt.domain;
+package org.demo.backend.global.jwt.domain.cache;
 
 import java.time.Duration;
 

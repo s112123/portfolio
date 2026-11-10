@@ -1,6 +1,6 @@
-package org.demo.backend.global.api;
+package org.demo.backend.global.web;
 
-import org.demo.backend.global.api.dto.ApiResponse;
+import org.demo.backend.global.web.dto.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
