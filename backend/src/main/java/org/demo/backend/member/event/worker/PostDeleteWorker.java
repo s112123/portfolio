@@ -1,4 +1,4 @@
-package org.demo.backend.member.withdrawal.worker;
+package org.demo.backend.member.event.worker;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

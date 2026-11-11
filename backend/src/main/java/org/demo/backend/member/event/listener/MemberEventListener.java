@@ -1,4 +1,4 @@
-package org.demo.backend.member.withdrawal.listener;
+package org.demo.backend.member.event.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,11 +6,11 @@ import org.demo.backend.member.domain.WithdrawalTaskException;
 import org.demo.backend.member.domain.WithdrawalTaskFailLog;
 import org.demo.backend.member.domain.WithdrawalTaskType;
 import org.demo.backend.member.persistence.WithdrawalTaskFailLogRepository;
-import org.demo.backend.member.withdrawal.worker.CommentDeleteWorker;
-import org.demo.backend.member.withdrawal.worker.PostDeleteWorker;
-import org.demo.backend.member.withdrawal.worker.PostLikeDeleteWorker;
+import org.demo.backend.member.event.worker.CommentDeleteWorker;
+import org.demo.backend.member.event.worker.PostDeleteWorker;
+import org.demo.backend.member.event.worker.PostLikeDeleteWorker;
 import org.demo.backend.member.domain.MemberRepository;
-import org.demo.backend.member.withdrawal.event.MemberDeleteEvent;
+import org.demo.backend.member.event.MemberDeleteEvent;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;

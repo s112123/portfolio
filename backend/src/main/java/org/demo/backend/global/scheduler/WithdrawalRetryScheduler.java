@@ -3,7 +3,7 @@ package org.demo.backend.global.scheduler;
 import lombok.RequiredArgsConstructor;
 import org.demo.backend.member.domain.WithdrawalTaskFailLog;
 import org.demo.backend.member.persistence.WithdrawalTaskFailLogRepository;
-import org.demo.backend.member.withdrawal.worker.WithdrawalRetryWorker;
+import org.demo.backend.member.event.worker.WithdrawalRetryWorker;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;

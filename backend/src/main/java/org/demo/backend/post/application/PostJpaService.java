@@ -15,8 +15,8 @@ import org.demo.backend.post.controller.dto.PostUpdateRequest;
 import org.demo.backend.post.domain.*;
 import org.demo.backend.post.domain.cache.PostHitsCacheRepository;
 import org.demo.backend.post.domain.cache.PostListCacheRepository;
-import org.demo.backend.post.event.PostCacheDeleteEvent;
-import org.demo.backend.post.event.PostCreateEvent;
+import org.demo.backend.post.event.PostDeleteCacheEvent;
+import org.demo.backend.post.event.PostCreateCacheEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,7 +68,7 @@ public class PostJpaService implements PostService {
         }
 
         // 4. 캐시 등록
-        eventPublisher.publishEvent(PostCreateEvent.of(savedPost));
+        eventPublisher.publishEvent(PostCreateCacheEvent.of(savedPost));
         return savedPost.getId();
     }
 
@@ -233,7 +233,7 @@ public class PostJpaService implements PostService {
         // 4. 글 정보 삭제
         postRepository.deleteByIdIn(postIds);
         // 5. 글 캐시 삭제 (Redis)
-        eventPublisher.publishEvent(PostCacheDeleteEvent.of(postIds));
+        eventPublisher.publishEvent(PostDeleteCacheEvent.of(postIds));
     }
 
     // 글 내용에서 <img> 태그에 있는 url 에서 파일 이름을 추출한다

@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.demo.backend.post.domain.SortType;
 import org.demo.backend.post.domain.cache.PostHitsCacheRepository;
 import org.demo.backend.post.domain.cache.PostListCacheRepository;
-import org.demo.backend.post.event.PostCacheDeleteEvent;
-import org.demo.backend.post.event.PostCreateEvent;
+import org.demo.backend.post.event.PostDeleteCacheEvent;
+import org.demo.backend.post.event.PostCreateCacheEvent;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -25,7 +25,7 @@ public class PostEventListener {
     // 등록한 글을 캐시한다 → 글 목록 조회를 위한 캐시
     @Async("postThreadPoolTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void cacheCreatedPost(PostCreateEvent event) {
+    public void cacheCreatedPost(PostCreateCacheEvent event) {
         try {
             postListCacheRepository.savePostId(SortType.LATEST, event.getPostId());
         } catch (Exception e) {
@@ -36,14 +36,14 @@ public class PostEventListener {
     // 삭제된 글의 캐시 삭제 이벤트
     @Async("postThreadPoolTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void clearDeletedPostCache(PostCacheDeleteEvent event) {
+    public void clearDeletedPostCache(PostDeleteCacheEvent event) {
         for (Long postId : event.getPostIds()) {
             try {
                 // 조회 수 캐시 삭제
                 postHitsCacheRepository.deleteHits(postId);
                 postHitsCacheRepository.deleteViewer(postId);
 
-                // 글 목록 캐시 삭제
+                // 글 목록 (최신순) 캐시 삭제
                 postListCacheRepository.deletePostList(
                         SortType.LATEST,
                         Collections.singletonList(postId)

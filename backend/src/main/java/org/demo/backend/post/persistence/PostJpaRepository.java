@@ -50,6 +50,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "JOIN FETCH p.member m " +
                     "LEFT JOIN FETCH m.profileImage " +
                     "WHERE p.id IN (:postIds) " +
+                    "  AND m.status = 'ACTIVE' " +
                     "ORDER BY p.id DESC"
     )
     List<Post> fetchByIdIn(@Param("postIds") List<Long> postIds);

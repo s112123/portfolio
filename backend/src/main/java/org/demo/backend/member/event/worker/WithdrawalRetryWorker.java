@@ -1,9 +1,8 @@
-package org.demo.backend.member.withdrawal.worker;
+package org.demo.backend.member.event.worker;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.backend.member.domain.MemberRepository;
-import org.demo.backend.member.domain.MemberRole;
 import org.demo.backend.member.domain.WithdrawalTaskFailLog;
 import org.demo.backend.member.domain.WithdrawalTaskType;
 import org.demo.backend.member.persistence.WithdrawalTaskFailLogRepository;
