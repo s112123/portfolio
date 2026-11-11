@@ -126,4 +126,10 @@ public class PostListRedisCacheRepository implements PostListCacheRepository {
         String key = PostListCacheKey.generatePostListKey(sortType);
         redisTemplate.delete(key);
     }
+
+    @Override
+    public boolean hasKey(SortType sortType) {
+        String key = PostListCacheKey.generatePostListKey(sortType);
+        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+    }
 }

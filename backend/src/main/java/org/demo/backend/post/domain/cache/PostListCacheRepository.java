@@ -19,4 +19,7 @@ public interface PostListCacheRepository {
 
     // 캐시 무효화
     void deleteKey(SortType sortType);
+
+    // 키 존재 여부
+    boolean hasKey(SortType sortType);
 }

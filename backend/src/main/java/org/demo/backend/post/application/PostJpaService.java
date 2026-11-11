@@ -3,6 +3,8 @@ package org.demo.backend.post.application;
 import lombok.RequiredArgsConstructor;
 import org.demo.backend.comment.application.CommentService;
 import org.demo.backend.global.exception.BusinessException;
+import org.demo.backend.global.lock.distributed.DistributedLockLettuceService;
+import org.demo.backend.global.lock.distributed.DistributedLockService;
 import org.demo.backend.global.web.dto.CursorDetail;
 import org.demo.backend.global.web.dto.PageDetail;
 import org.demo.backend.like.application.PostLikeService;
@@ -17,6 +19,7 @@ import org.demo.backend.post.domain.cache.PostHitsCacheRepository;
 import org.demo.backend.post.domain.cache.PostListCacheRepository;
 import org.demo.backend.post.event.PostDeleteEvent;
 import org.demo.backend.post.event.PostCreateEvent;
+import org.demo.backend.post.persistence.cache.PostListRedisCacheRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +44,7 @@ public class PostJpaService implements PostService {
     private final CommentService commentService;
     private final PostLikeService postLikeService;
     private final ApplicationEventPublisher eventPublisher;
+    private final DistributedLockService distributedLockService;
 
     @Override
     @Transactional
@@ -137,7 +141,38 @@ public class PostJpaService implements PostService {
             // 2. 캐시 조회
             List<Long> cachedPostIds = postListCacheRepository.findPostList(sortType, lastPostId, size);
 
-            // 3. 캐시 히트
+            // 3. 캐시 미스 → 캐시 키 자체가 없는 경우 (분산 락으로 캐시 스템피드 방지)
+            if ((cachedPostIds == null || cachedPostIds.isEmpty())
+                    ||!postListCacheRepository.hasKey(sortType)) {
+                String lockKey = "post:list:lock:" + sortType.name();
+                distributedLockService.executeWithLock(lockKey, () -> {
+                    // 락 획득 후, 캐시 재확인
+                    if (!postListCacheRepository.hasKey(sortType)) {
+                        // 상위 31개 게시글 조회 (캐시 웜업)
+                        CursorDetail<Post> topPosts =
+                                postRepository.fetchCursorByIdLessThan(
+                                        sortType,
+                                        null,
+                                        null,
+                                        PostListRedisCacheRepository.MAX_CACHE_COUNT,
+                                        null
+                                );
+                        CursorDetail<PostDetail> topPostsDetails = topPosts.map(p -> PostDetail.summaryOf(p));
+
+                        // Redis 캐시 저장
+                        postListCacheRepository.savePostList(
+                                sortType,
+                                topPostsDetails.getContent()
+                        );
+                    }
+                    return null;
+                });
+
+                // 캐시 생성 완료 후, 다시 캐시 조회
+                cachedPostIds = postListCacheRepository.findPostList(sortType, lastPostId, size);
+            }
+
+            // 4. 캐시 히트
             if (cachedPostIds != null && !cachedPostIds.isEmpty()) {
                 // 다음 페이지 존재 여부
                 boolean hasNext = cachedPostIds.size() > size;
@@ -194,7 +229,7 @@ public class PostJpaService implements PostService {
             }
         }
 
-        // 4. 캐시 미스 → DB 조회
+        // 5. 캐시 미스 또는 캐시 범위 밖 (캐시 키는 있는 경우) → DB 조회
         CursorDetail<Post> posts = postRepository.fetchCursorByIdLessThan(
                 sortType,
                 lastPostId,
@@ -204,12 +239,12 @@ public class PostJpaService implements PostService {
         );
         CursorDetail<PostDetail> postDetails = posts.map(post -> PostDetail.summaryOf(post));
 
-        // 5. 캐시 저장
+        // 6. 캐시 저장
         if (isCacheable && !posts.getContent().isEmpty()) {
             postListCacheRepository.savePostList(sortType, postDetails.getContent());
         }
 
-        // 6. 응답
+        // 7. 응답
         return postDetails;
     }
 
