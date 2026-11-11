@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.demo.backend.post.domain.cache.PostHitsCacheRepository;
+import org.demo.backend.post.event.PostHitsChangeEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,7 @@ public class PostHitsScheduler {
 
     private final PostHitsCacheRepository postHitsCacheRepository;
     private final PostHitsBatchRepository postHitsBatchRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 1분마다 조회 수를 DB 에 업데이트 한다
     @Scheduled(fixedDelay = 60000)
@@ -70,5 +73,10 @@ public class PostHitsScheduler {
                 successCount,
                 failureCount
         );
+
+        // 조회순 글 목록 캐시 갱신 (무효화)
+        if (successCount > 0) {
+            eventPublisher.publishEvent(PostHitsChangeEvent.of());
+        }
     }
 }

@@ -19,8 +19,7 @@ public class PostHitsRedisCacheRepository implements PostHitsCacheRepository {
 
     // Redis 에서 EXPIRE 는 초 단위이다
     // 24시간 → 86400초
-    // 5분 → 86400초
-    private static final Duration POST_VIEWERS_KEY_TTL = Duration.ofSeconds(300);
+    private static final Duration POST_VIEWERS_KEY_TTL = Duration.ofSeconds(60);
     private final RedisTemplate<String, String> redisTemplate;
 
     @Override

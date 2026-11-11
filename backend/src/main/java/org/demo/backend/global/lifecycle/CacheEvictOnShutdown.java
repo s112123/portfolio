@@ -15,7 +15,7 @@ public class CacheEvictOnShutdown {
 
     private final RedisTemplate<String, String> redisTemplate;
 
-//    @PreDestroy
+    @PreDestroy
     public void clearRedisCache() {
         try {
             RedisConnection connection = redisTemplate.getConnectionFactory().getConnection();
