@@ -14,13 +14,6 @@ spring:
   jpa:
     defer-datasource-initialization: true
 
-jwt:
-  secret-key: MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=
-  access-token:
-    expiration: 600000     # 10분 (600000) → 1000 * 60 * 10 (ms)
-  refresh-token:
-    expiration: 86400000   # 1일 (86400000) → 1000 * 60 * 60 * 24 * 1 (ms)
-
 ---
 app:
   host: http://localhost:8080
@@ -74,6 +67,13 @@ management:
     health:
       show-details: always
 
+jwt:
+  secret-key: MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=
+  access-token:
+    expiration: 600000     # 10분 (600000) → 1000 * 60 * 10 (ms)
+  refresh-token:
+    expiration: 86400000   # 1일 (86400000) → 1000 * 60 * 60 * 24 * 1 (ms)
+
 ---
 app:
   host: http://localhost:8080
@@ -93,10 +93,9 @@ spring:
     show-sql: true
     open-in-view: false
     database-platform: org.hibernate.dialect.MySQL8Dialect
-  data:
-    redis:
-      host: localhost
-      port: 6379
+  redis:
+    host: localhost
+    port: 6379
 
 file-upload:
   member:
@@ -121,11 +120,82 @@ management:
     health:
       show-details: always
 
+jwt:
+  secret-key: MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=
+  access-token:
+    expiration: 600000     # 10분 (600000) → 1000 * 60 * 10 (ms)
+  refresh-token:
+    expiration: 86400000   # 1일 (86400000) → 1000 * 60 * 60 * 24 * 1 (ms)
+
 ---
 app:
-  host: http://localhost:8080
+  host: http://s112123.cafe24.com
 
 spring:
   config:
     activate:
       on-profile: prod
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/s112123
+    username: s112123
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+  redis:
+    host: v112123.cafe24.com
+    port: 21106
+  task:
+    scheduling:
+      pool:
+        size: 5
+#  mail:
+#    host: smtp.naver.com
+#    port: 465
+#    username: email@naver.com
+#    password: ${SPRING_MAIL_PASSWORD}
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          ssl:
+#            enable: true
+#            trust: smtp.naver.com
+#          starttls:
+#            enable: true
+#        transport:
+#          protocol: smtp
+#        debug: true
+
+file-upload:
+  member:
+    base-url: /api/v1/profile-images/
+    default-image:
+      path: classpath:/static/images/member/
+      file: default.png
+    storage: /s112123/tomcat/webapps/upload/member/
+  post:
+    base-url: /api/v1/post-images/
+    default-image:
+      path: classpath:/static/images/post/
+      file: default.png
+    storage: /s112123/tomcat/webapps/upload/post/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,metrics,info"
+  endpoint:
+    health:
+      show-details: always
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  access-token:
+    expiration: 600000     # 10분 (600000) → 1000 * 60 * 10 (ms)
+  refresh-token:
+    expiration: 86400000   # 1일 (86400000) → 1000 * 60 * 60 * 24 * 1 (ms)

@@ -15,6 +15,8 @@ import java.util.List;
 public interface CommentJpaRepository extends JpaRepository<Comment, Long> {
 
     // 댓글 목록 (Recursive)
+    // 재귀는 MariaDB 10.2.2+ 또는 MySQL 8.0 이상부터 지원한다
+    // 현재 호스팅 (cafe24) 는 MariaDB 10.1.13 이므로 아래 코드 불가
     @Query(
             value = "WITH RECURSIVE CommentCTE AS (" +
                     "    SELECT id, content, registered_at, post_id, member_id, parent_id, " +
