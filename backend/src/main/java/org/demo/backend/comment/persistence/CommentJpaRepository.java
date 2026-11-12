@@ -14,9 +14,41 @@ import java.util.List;
 
 public interface CommentJpaRepository extends JpaRepository<Comment, Long> {
 
+    // 댓글 목록 → DB 낮은 버전
+    // Java Tree 로 처리하기 위해 DB 페이지네이션을 사용하지 않고 전체 댓글을 조회한다
+    // 일반적인 댓글 개수 수준에선 쓸만함 (단, 수만 댓글에는 성능 저하)
+    @Query(
+            value = "SELECT " +
+                    "   c.id AS id, " +
+                    "   c.content AS content, " +
+                    "   c.registered_at AS registered_at, " +
+                    "   c.parent_id AS parent_id, " +
+                    "   m.id AS writer_id, " +
+                    "   m.nickname AS writer_nickname, " +
+                    "   m.profile_image_url AS writer_profile_image_url, " +
+                    "   p.member_id AS post_writer_id, " +
+                    "   pm.nickname AS parent_writer_nickname, " +
+                    "   0 AS reply_count " +
+                    "FROM comment c " +
+                    "JOIN member m " +
+                    "   ON c.member_id = m.id " +
+                    "JOIN post p " +
+                    "   ON c.post_id = p.id " +
+                    "LEFT JOIN comment pc " +
+                    "   ON c.parent_id = pc.id " +
+                    "LEFT JOIN member pm " +
+                    "   ON pc.member_id = pm.id " +
+                    "WHERE c.post_id = :postId " +
+                    "ORDER BY c.id ASC",
+            nativeQuery = true
+    )
+    List<CommentProjection> fetchPageByPostId(
+            @Param("postId") Long postId
+    );
+
     // 댓글 목록 (Recursive)
     // 재귀는 MariaDB 10.2.2+ 또는 MySQL 8.0 이상부터 지원한다
-    // 현재 호스팅 (cafe24) 는 MariaDB 10.1.13 이므로 아래 코드 불가
+    // 현재 호스팅 (cafe24) 는 MariaDB 10.1.13 이므로 아래 쿼리 불가
     @Query(
             value = "WITH RECURSIVE CommentCTE AS (" +
                     "    SELECT id, content, registered_at, post_id, member_id, parent_id, " +
