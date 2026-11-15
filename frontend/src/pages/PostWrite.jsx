@@ -138,7 +138,7 @@ export default function PostWrite() {
                     }
                   });
                   // 서버에 저장된 이미지를 조회하는 API
-                  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+                  const baseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
                   const permanentImageUrl = baseUrl + response.data.data.url; 
                   callback(permanentImageUrl, blob.name);
                 } catch (error) {

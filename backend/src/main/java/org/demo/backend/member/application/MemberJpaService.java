@@ -69,6 +69,8 @@ public class MemberJpaService implements MemberService {
         // 1. 회원 조회
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(MemberErrorCode.NOT_FOUND));
+        // 2. 회원 상태 변경
+        member.inactive();
         // 2. 회원 삭제
         eventPublisher.publishEvent(MemberDeleteEvent.of(member));
     }

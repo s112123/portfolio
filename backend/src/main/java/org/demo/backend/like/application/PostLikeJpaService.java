@@ -5,12 +5,14 @@ import org.demo.backend.global.exception.BusinessException;
 import org.demo.backend.like.domain.PostLike;
 import org.demo.backend.like.domain.PostLikeErrorCode;
 import org.demo.backend.like.domain.PostLikeRepository;
+import org.demo.backend.post.event.PostLikesChangeEvent;
 import org.demo.backend.member.domain.Member;
 import org.demo.backend.member.domain.MemberErrorCode;
 import org.demo.backend.member.domain.MemberRepository;
 import org.demo.backend.post.domain.Post;
 import org.demo.backend.post.domain.PostErrorCode;
 import org.demo.backend.post.domain.PostRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ public class PostLikeJpaService implements PostLikeService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -41,6 +44,8 @@ public class PostLikeJpaService implements PostLikeService {
             postLikeRepository.save(PostLike.of(member, post));
             // 4. 좋아요 +1 증가 (동시성 문제 해결 → 원자적 업데이트)
             postRepository.incrementLikeById(postId);
+            // 5. 좋아요 캐시 갱신
+            eventPublisher.publishEvent(PostLikesChangeEvent.of());
         } catch (DataIntegrityViolationException e) {
             throw new BusinessException(PostLikeErrorCode.ALREADY_LIKES);
         }
@@ -56,6 +61,8 @@ public class PostLikeJpaService implements PostLikeService {
         postLikeRepository.deleteById(postLike.getId());
         // 3. 좋아요 -1 감소 (동시성 문제 해결 → 원자적 업데이트 + p.likes > 0 조건으로 0 이하 방지)
         postRepository.decrementLikeById(postId);
+        // 4. 좋아요 캐시 갱신
+        eventPublisher.publishEvent(PostLikesChangeEvent.of());
     }
 
     @Override

@@ -51,11 +51,8 @@ const formatNumber = (num) => {
 }
 
 const Main = () => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const keyword = searchParams.get('keyword') || '';
-  const [sortType, setSortType] = useState('LATEST'); 
+  const baseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
+  const [searchParams, setSearchParams] = useSearchParams();
   const [posts, setPosts] = useState([]);                 
   const [lastPostId, setLastPostId] = useState(null);     
   const [lastValue, setLastValue] = useState(null);       
@@ -63,7 +60,10 @@ const Main = () => {
   const [loading, setLoading] = useState(false);          
   const [error, setError] = useState(null);               
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const observerRef = useRef(null); 
+  const navigate = useNavigate();
+  const sortType = searchParams.get('sort') || 'LATEST';
+  const keyword = searchParams.get('keyword') || '';
+  const observerRef = useRef(null);
 
   // 로그인 상태 확인
   useEffect(() => {
@@ -77,13 +77,41 @@ const Main = () => {
     };
   }, []);
 
-  // 정렬 또는 검색어가 변경되면 상태 초기화 후, 첫 페이지 로드
+  // 정렬이나 검색어가 변경될 때 상태 초기화 및 데이터 로드 + 스크롤 복원 처리
   useEffect(() => {
     setLastPostId(null);
     setLastValue(null);
-    // 게시글 조회
-    fetchPosts(null, null, sortType, keyword, true);
+    setPosts([]);
+    
+    // 데이터 불러오기 수행 후, 뒤로가기로 돌아온 경우 저장된 스크롤 위치 복원
+    const loadInitialData = async () => {
+      await fetchPosts(null, null, sortType, keyword, true);
+      
+      const savedScrollPosition = sessionStorage.getItem('main_scroll_y');
+      if (savedScrollPosition) {
+        setTimeout(() => {
+          window.scrollTo(0, parseInt(savedScrollPosition, 10));
+          sessionStorage.removeItem('main_scroll_y');
+        }, 100);
+      }
+    };
+
+    loadInitialData();
   }, [sortType, keyword]);
+
+  // 상세 페이지로 이동하기 전 현재 스크롤 위치와 목록 상태 저장
+  const handlePostClick = (e, postId) => {
+    e.preventDefault();
+    sessionStorage.setItem('main_scroll_y', window.scrollY);
+    navigate(`/post/view?id=${postId}`);
+  };
+
+  // 정렬 변경 시 URL 쿼리 파라미터 업데이트
+  const handleSortChange = (newSort) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('sort', newSort);
+    setSearchParams(newParams);
+  };
 
   // 무한 스크롤 옵저버
   const handleObserver = useCallback((entries) => {
@@ -113,7 +141,7 @@ const Main = () => {
     };
   }, [handleObserver]);
 
-  // 로그인 상태
+  // 로그인 상태 확인 함수
   const checkLoginStatus = () => {
     const token = localStorage.getItem('itBlogAccessToken');
     setIsLoggedIn(!!token);
@@ -170,7 +198,7 @@ const Main = () => {
     }
   };
 
-  // 정렬에서 "전체" 버튼 클릭 시, 정렬 및 검색어 초기화
+  // 정렬에서 "전체" 버튼 클릭 시, 검색어 초기화
   const handleResetSearch = () => {
     navigate('/');
   };
@@ -193,21 +221,21 @@ const Main = () => {
           <li
             className={`sort-item ${sortType === 'LATEST' ? 'active' : ''}`}
             id="sort-latest"
-            onClick={() => setSortType('LATEST')}
+            onClick={() => handleSortChange('LATEST')}
           >
             최신 순
           </li>
           <li
             className={`sort-item ${sortType === 'LIKES' ? 'active' : ''}`}
             id="sort-likes"
-            onClick={() => setSortType('LIKES')}
+            onClick={() => handleSortChange('LIKES')}
           >
             좋아요 순
           </li>
           <li
             className={`sort-item ${sortType === 'HITS' ? 'active' : ''}`}
             id="sort-hits"
-            onClick={() => setSortType('HITS')}
+            onClick={() => handleSortChange('HITS')}
           >
             조회 순
           </li>
@@ -231,9 +259,9 @@ const Main = () => {
             {posts.map((post) => (
               <article key={post.id} className="post-card">
                 {post.thumbUrl && (
-                  <Link to={`/post/view?id=${post.id}`} className="thumbnail-wrapper">
+                  <a href={`/post/view?id=${post.id}`} onClick={(e) => handlePostClick(e, post.id)} className="thumbnail-wrapper">
                     <img src={`${baseUrl}${post.thumbUrl}`} alt={post.title} className="thumbnail-img" />
-                  </Link>
+                  </a>
                 )}
                 <div className="card-content">
                   <div className="post-item-content-top">
@@ -245,10 +273,10 @@ const Main = () => {
                       <div className="post-created-at">{formatTimeAgo(post.registeredAt)}</div>
                     </div>
                   </div>
-                  <Link to={`/post/view?id=${post.id}`} className="post-link">
+                  <a href={`/post/view?id=${post.id}`} onClick={(e) => handlePostClick(e, post.id)} className="post-link">
                     <h3 className="post-item-title">{post.title}</h3>
                     <p className="post-item-summary">{getContentSummary(post.content)}</p>
-                  </Link>
+                  </a>
                   <div className="post-item-content-bottom">
                     <div className="post-item-icon">
                       <i className="fa-regular fa-thumbs-up"></i>

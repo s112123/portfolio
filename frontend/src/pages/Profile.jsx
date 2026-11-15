@@ -4,7 +4,7 @@ import api from '../api/axios';
 import './Profile.css';
 
 const Profile = () => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  const baseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState({
     email: '',

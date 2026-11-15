@@ -50,6 +50,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "JOIN FETCH p.member m " +
                     "LEFT JOIN FETCH m.profileImage " +
                     "WHERE p.id IN (:postIds) " +
+                    "  AND m.status = 'ACTIVE' " +
                     "ORDER BY p.id DESC"
     )
     List<Post> fetchByIdIn(@Param("postIds") List<Long> postIds);
@@ -64,6 +65,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "  AND (:keyword IS NULL OR :keyword = '' " +
                     "       OR p.title LIKE CONCAT('%', :keyword, '%')" +
                     "       OR p.content LIKE CONCAT('%', :keyword, '%')) " +
+                    "  AND m.status = 'ACTIVE' " +
                     "ORDER BY p.id DESC"
     )
     Slice<Post> fetchCursorByIdLessThanLatest(
@@ -88,6 +90,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "  AND (:keyword IS NULL OR :keyword = '' " +
                     "       OR p.title LIKE CONCAT('%', :keyword, '%') " +
                     "       OR p.content LIKE CONCAT('%', :keyword, '%')) " +
+                    "  AND m.status = 'ACTIVE' " +
                     "ORDER BY p.likes DESC, p.id DESC"
     )
     Slice<Post> fetchCursorByIdLessThanLikes(
@@ -109,6 +112,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "  AND (:keyword IS NULL OR :keyword = '' " +
                     "       OR p.title LIKE CONCAT('%', :keyword, '%') " +
                     "       OR p.content LIKE CONCAT('%', :keyword, '%')) " +
+                    "  AND m.status = 'ACTIVE' " +
                     "ORDER BY p.hits DESC, p.id DESC"
     )
     Slice<Post> fetchCursorByIdLessThanHits(
@@ -153,7 +157,7 @@ public interface PostJpaRepository extends JpaRepository<Post, Long> {
                     "  AND (:lastPostId IS NULL OR p.id < :lastPostId) " +
                     "ORDER BY p.id DESC"
     )
-    Slice<Post> findCursorByIdLessThenAndMemberId(
+    Slice<Post> findCursorByMemberIdAndIdLessThan(
             @Param("memberId") Long memberId,
             @Param("lastPostId") Long lastPostId,
             Pageable pageable

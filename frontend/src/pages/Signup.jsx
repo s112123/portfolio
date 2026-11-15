@@ -229,7 +229,7 @@ const Signup = () => {
         password: form.password.trim(),
       };
 
-      const response = await api.post('http://localhost:8080/api/v1/members', formData);
+      const response = await api.post('/v1/members', formData);
       if (response.status === 200 || response.status === 201) {
         navigate('/login?new');
       }

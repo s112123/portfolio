@@ -3,6 +3,7 @@ package org.demo.backend.global.security;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.demo.backend.member.domain.MemberRepository;
+import org.demo.backend.member.domain.MemberStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,6 +19,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return memberRepository.fetchByEmail(email)
+                .filter(member -> member.getStatus() == MemberStatus.ACTIVE)
                 .map(CustomUserDetails::new)
                 .orElseThrow(() -> new UsernameNotFoundException("이메일 또는 비밀번호가 유효하지 않습니다"));
     }

@@ -42,6 +42,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
+                        // 프론트엔드 경로
+                        .antMatchers("/", "/assets/**").permitAll()
+                        // REST API 경로
                         .antMatchers(HttpMethod.GET, "/api/v1/health").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/otp/send/**").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/otp/verify/**").permitAll()
@@ -70,6 +73,8 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
+    // 개발 환경 (dev) 에서만 사용됨
+    // 운영 환경 (prod) 는 React.js 빌드 파일을 src > main > resources > static 에 넣을 것이므로 동일한 출처다
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

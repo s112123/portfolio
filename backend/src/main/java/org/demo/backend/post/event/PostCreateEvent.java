@@ -1,18 +1,19 @@
 package org.demo.backend.post.event;
 
 import lombok.Getter;
+import org.demo.backend.post.application.dto.PostDetail;
 import org.demo.backend.post.domain.Post;
 
 @Getter
 public class PostCreateEvent {
 
-    private final Long postId;
+    private final PostDetail postDetail;
 
-    private PostCreateEvent(Long postId) {
-        this.postId = postId;
+    private PostCreateEvent(Post post) {
+        this.postDetail = PostDetail.summaryOf(post);
     }
 
     public static PostCreateEvent of(Post post) {
-        return new PostCreateEvent(post.getId());
+        return new PostCreateEvent(post);
     }
 }

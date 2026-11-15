@@ -106,13 +106,13 @@ public class PostRepositoryAdapter implements PostRepository {
     }
 
     @Override
-    public CursorDetail<Post> findCursorByIdLessThenAndMemberId(
+    public CursorDetail<Post> findCursorByMemberIdAndIdLessThan(
             Long memberId,
             Long lastPostId,
             int size
     ) {
         Pageable pageable = PageRequest.of(0, size);
-        Slice<Post> slicePosts = postJpaRepository.findCursorByIdLessThenAndMemberId(memberId, lastPostId, pageable);
+        Slice<Post> slicePosts = postJpaRepository.findCursorByMemberIdAndIdLessThan(memberId, lastPostId, pageable);
         return CursorDetail.<Post>builder()
                 .content(slicePosts.getContent())
                 .hasNext(slicePosts.hasNext())

@@ -3,6 +3,8 @@ package org.demo.backend.post.application;
 import lombok.RequiredArgsConstructor;
 import org.demo.backend.comment.application.CommentService;
 import org.demo.backend.global.exception.BusinessException;
+import org.demo.backend.global.lock.distributed.DistributedLockLettuceService;
+import org.demo.backend.global.lock.distributed.DistributedLockService;
 import org.demo.backend.global.web.dto.CursorDetail;
 import org.demo.backend.global.web.dto.PageDetail;
 import org.demo.backend.like.application.PostLikeService;
@@ -15,8 +17,9 @@ import org.demo.backend.post.controller.dto.PostUpdateRequest;
 import org.demo.backend.post.domain.*;
 import org.demo.backend.post.domain.cache.PostHitsCacheRepository;
 import org.demo.backend.post.domain.cache.PostListCacheRepository;
-import org.demo.backend.post.event.PostCacheDeleteEvent;
+import org.demo.backend.post.event.PostDeleteEvent;
 import org.demo.backend.post.event.PostCreateEvent;
+import org.demo.backend.post.persistence.cache.PostListRedisCacheRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +44,7 @@ public class PostJpaService implements PostService {
     private final CommentService commentService;
     private final PostLikeService postLikeService;
     private final ApplicationEventPublisher eventPublisher;
+    private final DistributedLockService distributedLockService;
 
     @Override
     @Transactional
@@ -130,75 +134,118 @@ public class PostJpaService implements PostService {
             int size,
             String keyword
     ) {
-        // 캐시 조회 조건
-        // 검색어가 있는 경우, 글 목록으로 캐시하지 않는다
-        // 최신 순만 3페이지 목록 캐시한다
-        boolean isCacheable = (keyword == null || keyword.trim().isEmpty())
-                && sortType == SortType.LATEST;
+        // 1. 검색어가 없는 경우에만 캐시 사용 여부를 확인한 후, 캐시를 조회한다
+        boolean isCacheable = (keyword == null || keyword.trim().isEmpty());
 
-        // 1. 캐시 조회
         if (isCacheable) {
-            // hasNext 값을 구하기 위해 size + 1 만큼 조회한다
-            List<Long> cachedPostIds = postListCacheRepository.findPostList(sortType, lastPostId, size + 1);
+            // 2. 캐시 조회
+            List<Long> cachedPostIds = postListCacheRepository.findPostList(sortType, lastPostId, size);
 
-            // 2. 캐시 히트
-            if (cachedPostIds != null && !cachedPostIds.isEmpty()) {
-                Long firstId = cachedPostIds.get(0);
-                // 캐시 경계에 도달하지 않았으면 캐시에서 조회하고 캐시 경계면 DB 에서 조회한다
-                // 현재 로직은 hasNext 확인을 위해 캐시에는 캐시 데이터 + 1 만큼 저장한다
-                // 마지막 캐시 페이지에서도 hasNext=true 되어 다음 캐시에서 1개의 데이터가 나온다
-                // 그리고 hasNext=false 가 되기 때문에 DB 에 있는 다음 페이지를 DB에서 조회하지 않으므로 바운더리 확인을 해준다
-                if (!postListCacheRepository.isPostListCacheBoundary(sortType, firstId)) {
-                    boolean hasNext = cachedPostIds.size() > size;
-                    cachedPostIds = hasNext ? cachedPostIds.subList(0, size) : cachedPostIds;
+            // 3. 캐시 미스 → 캐시 키 자체가 없는 경우 (분산 락으로 캐시 스템피드 방지)
+            if ((cachedPostIds == null || cachedPostIds.isEmpty())
+                    ||!postListCacheRepository.hasKey(sortType)) {
+                String lockKey = "post:list:lock:" + sortType.name();
+                distributedLockService.executeWithLock(lockKey, () -> {
+                    // 락 획득 후, 캐시 재확인
+                    if (!postListCacheRepository.hasKey(sortType)) {
+                        // 상위 31개 게시글 조회 (캐시 웜업)
+                        CursorDetail<Post> topPosts =
+                                postRepository.fetchCursorByIdLessThan(
+                                        sortType,
+                                        null,
+                                        null,
+                                        PostListRedisCacheRepository.MAX_CACHE_COUNT,
+                                        null
+                                );
+                        CursorDetail<PostDetail> topPostsDetails = topPosts.map(p -> PostDetail.summaryOf(p));
 
-                    // IN 절 조회
-                    List<Post> posts = postRepository.fetchByIdIn(cachedPostIds);
-                    if (posts != null && !posts.isEmpty()) {
-                        // 캐시된 ID 순서로 정렬
-                        Map<Long, Post> postMap = posts.stream()
-                                .collect(Collectors.toMap(p -> p.getId(), Function.identity()));
-
-                        List<PostDetail> postDetails = cachedPostIds.stream()
-                                .map(id -> postMap.get(id))
-                                .filter(post -> Objects.nonNull(post))
-                                .map(post -> PostDetail.summaryOf(post))
-                                .collect(Collectors.toList());
-
-                        return CursorDetail.<PostDetail>builder()
-                                .content(postDetails)
-                                .hasNext(hasNext)
-                                .build();
+                        // Redis 캐시 저장
+                        postListCacheRepository.savePostList(
+                                sortType,
+                                topPostsDetails.getContent()
+                        );
                     }
+                    return null;
+                });
+
+                // 캐시 생성 완료 후, 다시 캐시 조회
+                cachedPostIds = postListCacheRepository.findPostList(sortType, lastPostId, size);
+            }
+
+            // 4. 캐시 히트
+            if (cachedPostIds != null && !cachedPostIds.isEmpty()) {
+                // 다음 페이지 존재 여부
+                boolean hasNext = cachedPostIds.size() > size;
+
+                // size 개수만큼 ID 추출
+                List<Long> sizedPostIds = cachedPostIds.stream()
+                        .limit(size)
+                        .collect(Collectors.toList());
+
+                // IN 절로 조회하는 경우
+                List<Post> posts = postRepository.fetchByIdIn(sizedPostIds);
+
+                if (posts != null && !posts.isEmpty()) {
+                    // IN 절은 IN 연산에 입력된 순서대로 조회가 하지 않으므로 캐시된 순서대로 다시 정렬을 해주어야 한다
+                    Map<Long, Post> postMap = posts.stream()
+                            .collect(Collectors.toMap(p -> p.getId(), Function.identity()));
+
+                    List<PostDetail> sortedPostDetails = sizedPostIds.stream()
+                            .map(cachedId -> postMap.get(cachedId))
+                            // 캐시에는 존재하지만 DB 에 존재하지 않는 글일 수 있으므로 null 을 처리한다
+                            .filter(post -> Objects.nonNull(post))
+                            .map(post -> PostDetail.summaryOf(post))
+                            .collect(Collectors.toList());
+
+                    // hasNext 가 false 인 경우, DB 에 다음 페이지가 있는지 확인
+                    if (!hasNext && !sortedPostDetails.isEmpty()) {
+                        // 응답할 10개에서 마지막 글
+                        PostDetail sortedLastPost = sortedPostDetails.get(sortedPostDetails.size() - 1);
+                        // 마지막 글의 ID
+                        Long sortedLastPostId = sortedLastPost.getId();
+                        // 마지막 글의 좋아요 수
+                        Long sortedLastPostValue = sortType == SortType.LIKES
+                                ? sortedLastPost.getLikes()
+                                : (sortType == SortType.HITS ? sortedLastPost.getHits() : null);
+
+                        // sortedPostLastId 이후에 데이터가 있는지 1개 찾아본다
+                        CursorDetail<Post> nextPost = postRepository.fetchCursorByIdLessThan(
+                                sortType,
+                                sortedLastPostId,
+                                sortedLastPostValue,
+                                1,
+                                keyword
+                        );
+                        // 있으면 hasNext 를 true 로 하여 DB 를 조회하도록 한다
+                        hasNext = !nextPost.getContent().isEmpty();
+                    }
+
+                    // 캐시 응답
+                    return CursorDetail.<PostDetail>builder()
+                            .content(sortedPostDetails)
+                            .hasNext(hasNext)
+                            .build();
                 }
             }
         }
 
-        // 3. 캐시 미스 → DB 조회
-        // 캐시 조회를 위해 11개 조회하여 캐시에 저장한다
-        CursorDetail<Post> cursorDetail = postRepository.fetchCursorByIdLessThan(
+        // 5. 캐시 미스 또는 캐시 범위 밖 (캐시 키는 있는 경우) → DB 조회
+        CursorDetail<Post> posts = postRepository.fetchCursorByIdLessThan(
                 sortType,
                 lastPostId,
                 lastValue,
-                size + 1,
+                size,
                 keyword
         );
+        CursorDetail<PostDetail> postDetails = posts.map(post -> PostDetail.summaryOf(post));
 
-        // 4. 캐시 저장
-        if (cursorDetail != null && !cursorDetail.getContent().isEmpty() && isCacheable) {
-            postListCacheRepository.savePostList(sortType, cursorDetail.getContent());
+        // 6. 캐시 저장
+        if (isCacheable && !posts.getContent().isEmpty()) {
+            postListCacheRepository.savePostList(sortType, postDetails.getContent());
         }
 
-        // 응답할 때는 10개만 응답한다
-        boolean hasNext = cursorDetail.getContent().size() > size;
-        List<PostDetail> postDetails = cursorDetail.getContent().stream()
-                .limit(10)
-                .map(PostDetail::summaryOf)
-                .collect(Collectors.toList());
-        return CursorDetail.<PostDetail>builder()
-                .content(postDetails)
-                .hasNext(hasNext)
-                .build();
+        // 7. 응답
+        return postDetails;
     }
 
     @Override
@@ -233,7 +280,7 @@ public class PostJpaService implements PostService {
         // 4. 글 정보 삭제
         postRepository.deleteByIdIn(postIds);
         // 5. 글 캐시 삭제 (Redis)
-        eventPublisher.publishEvent(PostCacheDeleteEvent.of(postIds));
+        eventPublisher.publishEvent(PostDeleteEvent.of(postIds));
     }
 
     // 글 내용에서 <img> 태그에 있는 url 에서 파일 이름을 추출한다

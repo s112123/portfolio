@@ -43,7 +43,7 @@ public interface PostRepository {
     );
 
     // 특정 회원의 글 목록 (Cursor)
-    CursorDetail<Post> findCursorByIdLessThenAndMemberId(
+    CursorDetail<Post> findCursorByMemberIdAndIdLessThan(
             Long memberId,
             Long lastPostId,
             int size

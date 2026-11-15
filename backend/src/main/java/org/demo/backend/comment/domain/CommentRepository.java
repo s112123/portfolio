@@ -1,6 +1,7 @@
 package org.demo.backend.comment.domain;
 
 import org.demo.backend.comment.persistence.CommentProjection;
+import org.demo.backend.global.web.dto.CursorDetail;
 import org.demo.backend.global.web.dto.PageDetail;
 
 import java.util.List;
@@ -22,4 +23,14 @@ public interface CommentRepository {
 
     // 특정 게시물의 모든 댓글 삭제
     int deleteByPostIdIn(List<Long> postIds);
+
+    // 글 삭제 (배치)
+    int deleteByIdIn(List<Long> ids);
+
+    // 특정 회원의 댓글 목록 (Cursor)
+    CursorDetail<Comment> findCursorByMemberIdAndIdLessThan(
+            Long memberId,
+            Long lastCommentId,
+            int size
+    );
 }

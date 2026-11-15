@@ -47,7 +47,7 @@ const formatCount = (count) => {
 };
 
 export default function PostRead() {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  const baseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
   const [searchParams] = useSearchParams();
   const postId = searchParams.get('id');
   const navigate = useNavigate();

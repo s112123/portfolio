@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import api from '../api/axios';
 import './Login.css';
 
@@ -196,7 +196,7 @@ const Login = () => {
             <button type="submit" id="btn-sign-in" className="login-btn">로그인</button>
           </form>
           <p className="sign-in-box-more-action">
-            <a href="/signup">회원가입</a>
+            <Link to="/signup">회원가입</Link>
             <span className="more-action-divider"></span>
             <a href="#/" onClick={(e) => { e.preventDefault(); handleFindPassword(); }}>
               비밀번호 찾기

@@ -1,4 +1,4 @@
-package org.demo.backend.global.web;
+package org.demo.backend.global.web.controller;
 
 import org.demo.backend.global.web.dto.ApiResponse;
 import org.springframework.http.ResponseEntity;

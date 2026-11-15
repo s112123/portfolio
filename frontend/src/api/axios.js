@@ -1,13 +1,12 @@
 import axios from 'axios';
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
 
 // 인증이 불필요한 퍼블릭 API 목록 (HTTP Method와 URL 매칭 규칙 명시)
 const PUBLIC_APIS = [
   { method: 'GET', url: '/v1/health' },
   { method: 'POST', url: '/v1/otp/send/email' },
   { method: 'POST', url: '/v1/otp/verify/email' },
-  { method: 'POST', url: '/v1/auth/signup' },
   { method: 'POST', url: '/v1/auth/login' },
   { method: 'POST', url: '/v1/auth/refresh' },
   { method: 'PATCH', url: '/v1/members/change-password' },
