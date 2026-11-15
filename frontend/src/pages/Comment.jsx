@@ -10,7 +10,7 @@ const formatDateTime = (dateString) => {
 };
 
 export default function Comment({ postId, currentUser }) {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  const baseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
   const [commentData, setCommentData] = useState({
     content: [],
     currentPage: 1,
@@ -25,6 +25,7 @@ export default function Comment({ postId, currentUser }) {
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyingToNickname, setReplyingToNickname] = useState(''); 
   const [replyContent, setReplyContent] = useState('');
+  const [highlightedId, setHighlightedId] = useState(null);
   const commentInputRef = useRef(null);
   const replyInputRef = useRef(null);
   const commentsEndRef = useRef(null);
@@ -82,7 +83,9 @@ export default function Comment({ postId, currentUser }) {
         parentId: null
       };
 
-      await api.post('/v1/comments', requestData);
+      const response = await api.post('/v1/comments', requestData);
+      const newCommentId = response.data?.data?.id;
+
       setCommentContent('');
       
       // 댓글 등록 시, 마지막 페이지로 이동
@@ -93,6 +96,11 @@ export default function Comment({ postId, currentUser }) {
         await fetchComments(calculatedLastPage);
       } else {
         setCurrentPage(calculatedLastPage);
+      }
+
+      // 방금 등록된 댓글 ID 설정 (새로운 댓글을 달기 전까지 유지됨)
+      if (newCommentId) {
+        setHighlightedId(newCommentId);
       }
 
       // 댓글 등록 후 하단으로 스크롤 이동
@@ -128,7 +136,8 @@ export default function Comment({ postId, currentUser }) {
         parentId: targetCommentId
       };
 
-      await api.post('/v1/comments', requestData);
+      const response = await api.post('/v1/comments', requestData);
+      const newReplyId = response.data?.data?.id;
 
       setReplyContent('');
       setReplyingTo(null);
@@ -142,6 +151,7 @@ export default function Comment({ postId, currentUser }) {
       // 대상 댓글이 현재 페이지에 없으면 현재 페이지 새로고침
       if (targetIndex === -1) {
         await fetchComments(currentPage);
+        if (newReplyId) setHighlightedId(newReplyId);
         return;
       }
 
@@ -153,7 +163,6 @@ export default function Comment({ postId, currentUser }) {
       const replyCount = Number(targetComment.replyCount || 0);
 
       // 새로 등록한 답글이 들어갈 전체 목록의 인덱스
-      // 부모 댓글 + 기존 자손 댓글 뒤에 새 답글이 추가된다
       const newReplyIndex = parentGlobalIndex + replyCount + 1;
       // 새 답글이 위치할 페이지 계산
       const targetPage = Math.floor(newReplyIndex / commentData.size) + 1;
@@ -165,13 +174,17 @@ export default function Comment({ postId, currentUser }) {
         await fetchComments(targetPage);
       }
 
+      // 방금 등록된 답글 ID 설정
+      if (newReplyId) {
+        setHighlightedId(newReplyId);
+      }
+
       // 스크롤 이동
       setTimeout(() => {
         commentsEndRef.current?.scrollIntoView({
           behavior: 'smooth'
         });
       }, 100);
-
     } catch (error) {
       console.error('답글 등록 실패:', error);
       alert(error.response?.data?.message || '답글 등록에 실패했습니다.');
@@ -183,6 +196,12 @@ export default function Comment({ postId, currentUser }) {
     if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
     try {
       await api.delete(`/v1/comments/${commentId}`);
+      
+      // 삭제한 댓글이 하이라이트된 댓글이었다면 하이라이트 해제
+      if (String(commentId) === String(highlightedId)) {
+        setHighlightedId(null);
+      }
+
       // 삭제 후 현재 페이지에 데이터가 없고 1페이지보다 크면 앞 페이지로 이동
       const remainingElements = commentData.totalElements - 1;
       const maxPage = Math.ceil(remainingElements / commentData.size) || 1;
@@ -205,7 +224,6 @@ export default function Comment({ postId, currentUser }) {
   return (
     <div className="comments-section">
       <h3>댓글 ({commentData.totalElements})</h3>
-      
       {/* 댓글 입력 */}
       <form onSubmit={handleCommentSubmit} className="comment-form">
         <div className="comment-input-container">
@@ -231,12 +249,13 @@ export default function Comment({ postId, currentUser }) {
           <button type="submit" className="btn-comment-submit">등록</button>
         )}
       </form>
-
       {/* 댓글 목록 */}
       <div className="comment-list">
         {commentData.content.map((comment) => {
           const isCommentWriter = currentUser && String(currentUser.memberId) === String(comment.writer?.id);
           const isReply = comment.parentId !== null && comment.parentId !== undefined;
+          // 방금 등록된 댓글인지 확인
+          const isNewItem = String(comment.id) === String(highlightedId);
 
           let parentWriterNickname = '';
           if (isReply) {
@@ -247,7 +266,7 @@ export default function Comment({ postId, currentUser }) {
           return (
             <div 
               key={comment.id} 
-              className={`comment-item ${isReply ? 'comment-reply-item' : ''}`}
+              className={`comment-item ${isReply ? 'comment-reply-item' : ''} ${isNewItem ? 'comment-new-item' : ''}`}
             >
               <div className="comment-meta-header">
                 <img 

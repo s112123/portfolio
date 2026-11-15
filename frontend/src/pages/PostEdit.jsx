@@ -162,7 +162,8 @@ export default function PostUpdate() {
                     }
                   });
                   // 서버에 저장된 이미지를 조회하는 API
-                  const permanentImageUrl = 'http://localhost:8080' + response.data.data.url; 
+                  const baseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
+                  const permanentImageUrl = baseUrl + response.data.data.url; 
                   callback(permanentImageUrl, blob.name);
                 } catch (error) {
                   // console.error('이미지 업로드 실패:', error);

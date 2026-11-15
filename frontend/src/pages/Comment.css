@@ -87,6 +87,12 @@
   border-left: 2px solid #cbd5e1 !important;
 }
 
+.comment-item.comment-new-item,
+.comment-reply-item.comment-new-item {
+  border-left-color: rgb(210, 40, 40) !important;
+  border-left-width: 3px !important;
+}
+
 .comment-meta-header {
   display: flex;
   align-items: center;
