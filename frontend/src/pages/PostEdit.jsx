@@ -37,7 +37,7 @@ export default function PostUpdate() {
         setTitle(postData.title);
         if (editorRef.current) {
           const editorInstance = editorRef.current.getInstance();
-          editorInstance.setMarkdown(postData.content || ''); 
+          editorInstance.setHTML(postData.content || ''); 
         }
       } catch (error) {
         // console.error('글 조회 중 에러 발생:', error);
@@ -60,13 +60,32 @@ export default function PostUpdate() {
     }
   };
 
+  // 에디터 본문에 비었는지 여부를 확인하는 함수
+  const isEmptyHtmlContent = (html) => {
+    if (!html) return true;
+
+    // 이미지, 구분선, 미디어 등 유효한 요소가 있으면 내용이 있다고 판단
+    if (/<(img|hr|iframe|video|audio|table)\b/i.test(html)) {
+      return false;
+    }
+
+    // HTML 태그를 제거하고 공백 문자 (&nbsp; 포함) 를 정리해 텍스트 존재 여부 확인
+    const textOnly = html
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/\u200B/g, '')
+      .trim();
+
+    return textOnly.length === 0;
+  };  
+
   // 글 수정
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
     
     const editorInstance = editorRef.current.getInstance();
-    const markdownContent = editorInstance.getMarkdown();
+    let htmlContent = editorInstance.getHTML();
 
     // 유효성 검사 초기화
     setTitleError('');
@@ -82,7 +101,7 @@ export default function PostUpdate() {
     }
 
     // 유효성 검사 -> 내용
-    if (!markdownContent.trim()) {
+    if (isEmptyHtmlContent(htmlContent)) {
       setContentError('내용을 입력해주세요');
       if (isValid) {
         // 내용에만 에러가 났을 경우 에디터로 포커스
@@ -96,7 +115,7 @@ export default function PostUpdate() {
 
     const postData = {
       title: title,
-      content: markdownContent,
+      content: htmlContent,
     };
 
     let isSaved = false;

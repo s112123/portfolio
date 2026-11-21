@@ -53,7 +53,7 @@ const Header = () => {
 
   // 로그인 상태
   const checkLoginStatus = () => {
-    const token = localStorage.getItem('itBlogAccessToken');
+    const token = sessionStorage.getItem('itBlogAccessToken');
     setIsLoggedIn(!!token);
   };
 
@@ -65,7 +65,7 @@ const Header = () => {
     } catch (error) {
       console.error('로그아웃 요청 중 에러 발생:', error);
     } finally {
-      localStorage.removeItem('itBlogAccessToken');
+      sessionStorage.removeItem('itBlogAccessToken');
       setIsLoggedIn(false);
       window.dispatchEvent(new Event('authChange'));
       navigate('/');

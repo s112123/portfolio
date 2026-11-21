@@ -56,7 +56,7 @@ const Profile = () => {
         
         // 존재하지 않는 회원(DB 초기화 등)일 경우 에러창 1번만 띄우고 토큰 정리 후 홈으로 이동
         alert(error.response?.data?.message || '존재하지 않는 회원입니다.');
-        localStorage.removeItem('itBlogAccessToken');
+        sessionStorage.removeItem('itBlogAccessToken');
         navigate('/');
       } finally {
         setLoading(false);
@@ -96,7 +96,7 @@ const Profile = () => {
         }
 
         // 3. 클라이언트 토큰 정리 및 홈 이동
-        localStorage.removeItem('itBlogAccessToken');
+        sessionStorage.removeItem('itBlogAccessToken');
         alert('회원 탈퇴가 완료되었습니다.');
         window.location.href = '/';
       } catch (error) {

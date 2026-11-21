@@ -74,6 +74,11 @@
   user-select: none;
 }
 
+.toast-editor-box .toastui-editor-ww-code-block-highlighting pre code,
+.toast-editor-box .toastui-editor-ww-code-block-highlighting pre code span {
+  background-color: transparent !important;
+}
+
 /* ----- ERROR MESSAGE BOX ----- */
 .error-message {
   width: 100%;

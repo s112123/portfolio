@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 
 export default function PrivateRoute() {
   // 로컬 스토리지나 상태 관리소에 Access Token 이 있는지 확인
-  const token = localStorage.getItem('itBlogAccessToken');
+  const token = sessionStorage.getItem('itBlogAccessToken');
 
   // 토큰이 없으면 로그인 페이지로 강제 리다이렉트
   if (!token) {

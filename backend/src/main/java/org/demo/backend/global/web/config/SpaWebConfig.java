@@ -27,13 +27,17 @@ public class SpaWebConfig implements WebMvcConfigurer {
                             String requestPath,
                             List<? extends Resource> locations, ResourceResolverChain chain
                     ) {
-                        // 1. 요청한 리소스가 실제 존재하는지 확인
+                        // 1. API 경로는 존재하지 않는 경우, index.html 을 반환하지 않도록 제외한다
+                        if (requestPath.startsWith("api/")) {
+                            return null;
+                        }
+                        // 2. 요청한 리소스가 실제 존재하는지 확인
                         Resource resource = super.resolveResourceInternal(request, requestPath, locations, chain);
-                        // 2. 파일이 존재하면(js, css, 이미지 등) 그대로 반환
+                        // 3. 파일이 존재하면(js, css, 이미지 등) 그대로 반환
                         if (resource != null) {
                             return resource;
                         }
-                        // 3. 존재하지 않는 경로(예: /profile 새로고침)라면 index.html 반환
+                        // 4. 존재하지 않는 경로(예: /profile 새로고침)라면 index.html 반환
                         return new ClassPathResource("/static/index.html");
                     }
                 });

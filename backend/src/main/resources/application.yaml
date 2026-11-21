@@ -1,8 +1,8 @@
 spring:
   application:
     name: blog-service
-#  profiles:
-#    active: dev
+  profiles:
+    active: dev
   multipart:
     max-file-size: 1MB
     max-request-size: 10MB

@@ -1,6 +1,7 @@
 package org.demo.backend.global.scheduler;
 
 import lombok.RequiredArgsConstructor;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.demo.backend.member.domain.WithdrawalTaskFailLog;
 import org.demo.backend.member.persistence.WithdrawalTaskFailLogRepository;
 import org.demo.backend.member.event.worker.WithdrawalRetryWorker;
@@ -20,6 +21,11 @@ public class WithdrawalRetryScheduler {
 
     // 10분마다 실패한 회원 탈퇴 처리 재시도
     @Scheduled(fixedDelay = 600_000)
+    @SchedulerLock(
+            name = "retryWithdrawal",
+            lockAtLeastFor = "3m",
+            lockAtMostFor = "30m"
+    )
     public void retryWithdrawal() {
         int chunkSize = 100;
         Pageable pageable = PageRequest.of(0, chunkSize);

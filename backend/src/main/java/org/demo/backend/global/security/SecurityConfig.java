@@ -43,7 +43,17 @@ public class SecurityConfig {
                 .addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         // 프론트엔드 경로
-                        .antMatchers("/", "/assets/**").permitAll()
+                        .antMatchers(HttpMethod.GET,
+                                "/",
+                                "/assets/**",
+                                "/index.html",
+                                "/favicon.ico",
+                                "/login",
+                                "/signup",
+                                "/post/**",
+                                "/profile",
+                                "/error"
+                        ).permitAll()
                         // REST API 경로
                         .antMatchers(HttpMethod.GET, "/api/v1/health").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/otp/send/**").permitAll()
@@ -95,3 +105,5 @@ public class SecurityConfig {
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 }
+
+

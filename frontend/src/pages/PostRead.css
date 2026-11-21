@@ -70,8 +70,49 @@
 }
 
 .post-content-viewer .toastui-editor-contents {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif !important;
   font-size: 15.5px !important;
-  font-family: inherit;
+  line-height: 1.6 !important;
+}
+
+.post-content-viewer .toastui-editor-contents p {
+  margin: 4px 0 !important;
+}
+
+.post-content-viewer .toastui-editor-contents p:empty,
+.post-content-viewer .toastui-editor-contents p:has(> br:only-child) {
+  margin: 2px 0 !important;
+  line-height: 1.2 !important;
+}
+
+.post-content-viewer .toastui-editor-contents pre,
+.post-content-viewer .toastui-editor-contents pre code,
+.post-content-viewer .toastui-editor-contents pre span,
+.post-content-viewer .toastui-editor-contents div[data-language="text"] * {
+  font-size: 14.5px !important; 
+  line-height: 1.5 !important;
+}
+
+.post-content-viewer .toastui-editor-contents pre {
+  background-color: #eaedf0d4 !important;
+  border: 1px solid #eaedf0d4 !important;
+  padding: 16px 20px;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.post-content-viewer .toastui-editor-contents pre code {
+  font-family: Consolas, Monaco, 'Courier New', monospace !important;
+  white-space: pre;
+  word-break: normal;
+}
+
+.post-content-viewer .toastui-editor-contents pre code span.token.operator {
+  background-color: transparent !important;
+}
+
+.post-content-viewer .toastui-editor-ww-code-block-highlighting::after {
+  display: none !important;
 }
 
 /* ----- LIKE ----- */

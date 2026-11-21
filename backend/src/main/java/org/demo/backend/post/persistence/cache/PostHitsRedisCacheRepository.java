@@ -18,8 +18,9 @@ import java.util.*;
 public class PostHitsRedisCacheRepository implements PostHitsCacheRepository {
 
     // Redis 에서 EXPIRE 는 초 단위이다
+    // 1분 → 60초
     // 24시간 → 86400초
-    private static final Duration POST_VIEWERS_KEY_TTL = Duration.ofSeconds(60);
+    private static final Duration POST_VIEWERS_KEY_TTL = Duration.ofSeconds(86400);
     private final RedisTemplate<String, String> redisTemplate;
 
     @Override
@@ -36,15 +37,15 @@ public class PostHitsRedisCacheRepository implements PostHitsCacheRepository {
         // ARGV[3] → HASH 의 필드
         RedisScript<Long> VIEW_COUNT_SCRIPT = RedisScript.of(
                 "local added = redis.call('SADD', KEYS[1], ARGV[1]) " +
-                        "if added == 1 then " +
-                        "   redis.call('EXPIRE', KEYS[1], ARGV[2]) " +
-                        "   redis.call('HINCRBY', KEYS[2], ARGV[3], 1) " +
-                        "end " +
-                        "local currentDelta = redis.call('HGET', KEYS[2], ARGV[3]) " +
-                        "if not currentDelta then " +
-                        "   return 0 " +
-                        "end " +
-                        "return tonumber(currentDelta)",
+                "if added == 1 then " +
+                "   redis.call('EXPIRE', KEYS[1], ARGV[2]) " +
+                "   redis.call('HINCRBY', KEYS[2], ARGV[3], 1) " +
+                "end " +
+                "local currentDelta = redis.call('HGET', KEYS[2], ARGV[3]) " +
+                "if not currentDelta then " +
+                "   return 0 " +
+                "end " +
+                "return tonumber(currentDelta)",
                 Long.class
         );
         Long delta = redisTemplate.execute(

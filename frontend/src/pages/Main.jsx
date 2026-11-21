@@ -143,7 +143,7 @@ const Main = () => {
 
   // 로그인 상태 확인 함수
   const checkLoginStatus = () => {
-    const token = localStorage.getItem('itBlogAccessToken');
+    const token = sessionStorage.getItem('itBlogAccessToken');
     setIsLoggedIn(!!token);
   };
 

@@ -27,7 +27,7 @@ public class PostHitsScheduler {
     @Scheduled(fixedDelay = 60000)
     @SchedulerLock(
             name = "flushPostHitsToRdb",
-            lockAtLeastFor = "0s",
+            lockAtLeastFor = "10s",
             lockAtMostFor = "5m"
     )
     public void flushPostHitsToRdb() {

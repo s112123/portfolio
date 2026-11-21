@@ -72,7 +72,7 @@ public class PostEventListener {
     public void clearDeletedPostCache(PostDeleteEvent event) {
         for (Long postId : event.getPostIds()) {
             try {
-                // 조회 수 캐시 삭제
+                // 조회 수 캐시 삭제 → 원자적으로 처리하는 것을 권장한다
                 postHitsCacheRepository.deleteHits(postId);
                 postHitsCacheRepository.deleteViewer(postId);
 
@@ -81,6 +81,10 @@ public class PostEventListener {
                         SortType.LATEST,
                         Collections.singletonList(postId)
                 );
+                // 글 목록 (좋아요순) 캐시 삭제
+                postListCacheRepository.deleteKey(SortType.LIKES);
+                // 글 목록 (조회순) 캐시 삭제
+                postListCacheRepository.deleteKey(SortType.HITS);
             } catch (Exception e) {
                 log.warn("글 삭제 후, 캐시 정리에 실패했습니다: postId={}", postId, e);
             }

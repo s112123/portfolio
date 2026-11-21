@@ -101,7 +101,7 @@ public class AuthService {
                 accessToken,
                 token -> jwtCacheService.saveTokenInBlacklist(token, JwtType.ACCESS)
         );
-        // 2. Access Token 을 블랙리스트에 넣음
+        // 2. Refresh Token 을 블랙리스트에 넣음
         blacklistTokenIfPresent(
                 refreshToken,
                 token ->  jwtCacheService.saveTokenInBlacklist(token, JwtType.REFRESH)

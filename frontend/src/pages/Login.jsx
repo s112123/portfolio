@@ -67,7 +67,7 @@ const Login = () => {
       
       if (response.data.success) {
         const token = response.data.data;
-        localStorage.setItem('itBlogAccessToken', token);
+        sessionStorage.setItem('itBlogAccessToken', token);
         
         navigate('/');
         window.location.href = '/';

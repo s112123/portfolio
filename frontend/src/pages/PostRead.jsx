@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import codeSyntaxHighlight from '@toast-ui/editor-plugin-code-syntax-highlight/dist/toastui-editor-plugin-code-syntax-highlight-all.js';
+import DOMPurify from 'dompurify';
 import { Viewer } from '@toast-ui/react-editor';
 import '@toast-ui/editor/dist/toastui-editor-viewer.css';
+import 'prismjs/themes/prism.css';
+import '@toast-ui/editor-plugin-code-syntax-highlight/dist/toastui-editor-plugin-code-syntax-highlight.css';
 import api from '../api/axios';
 import Comment from './Comment';
 import './PostRead.css';
@@ -64,7 +68,7 @@ export default function PostRead() {
       return;
     }
 
-    const token = localStorage.getItem('itBlogAccessToken');
+    const token = sessionStorage.getItem('itBlogAccessToken');
     if (token) {
       const decodedToken = parseJwt(token);
       if (decodedToken && decodedToken.sub) {
@@ -167,7 +171,18 @@ export default function PostRead() {
       </div>
       <hr className="divider" />
       <div className="post-content-viewer">
-        <Viewer initialValue={post.content || ''} />
+        {/* getMarkDown() 으로 저장한 경우
+        <Viewer 
+          initialValue={post.content || ''} 
+          plugins={[codeSyntaxHighlight]}
+        />
+         */}
+        <div
+          className="toastui-editor-contents"
+          dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(post.content || '')
+          }}
+        />
       </div>
       <div className="post-like-section">
         <button onClick={handleLikeToggle} className={`btn-like ${liked ? 'liked' : ''}`}>

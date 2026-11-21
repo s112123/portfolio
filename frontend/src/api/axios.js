@@ -40,7 +40,7 @@ api.interceptors.request.use(
     });
 
     if (!isPublic) {
-      const token = localStorage.getItem('itBlogAccessToken');
+      const token = sessionStorage.getItem('itBlogAccessToken');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -57,7 +57,7 @@ api.interceptors.request.use(
 
 // 큐잉 처리를 위한 상태 변수
 let isRefreshing = false; // 현재 토큰을 갱신 중인지 여부
-let failedQueue = [];    // 갱신을 기다리는 요청들의 대기 큐
+let failedQueue = [];     // 갱신을 기다리는 요청들의 대기 큐
 
 // 대기 중인 요청들을 처리하는 함수
 const processQueue = (error, token = null) => {
@@ -100,7 +100,7 @@ api.interceptors.response.use(
       if (isSkipUrl) {
         // 만약 /auth/refresh 자체에서 401이 난 거라면 세션 만료 처리
         if (originalRequest.url.includes('/auth/refresh')) {
-          localStorage.removeItem('itBlogAccessToken');
+          sessionStorage.removeItem('itBlogAccessToken');
           window.location.href = '/login';
         }
         return Promise.reject(error);
@@ -133,8 +133,7 @@ api.interceptors.response.use(
 
         // 새로운 Access Token 획득
         const newAccessToken = response.data.data;
-        console.log(`newAccessToken: ${newAccessToken}`);
-        localStorage.setItem('itBlogAccessToken', newAccessToken);
+        sessionStorage.setItem('itBlogAccessToken', newAccessToken);
 
         // 헤더 갱신
         api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
@@ -151,7 +150,7 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
         isRefreshing = false;
 
-        localStorage.removeItem('itBlogAccessToken');
+        sessionStorage.removeItem('itBlogAccessToken');
         window.location.href = '/login';
 
         return Promise.reject(refreshError);
